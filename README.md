@@ -1,16 +1,103 @@
-# React + Vite
+# Al-Farmashiia - Pharmacy E-commerce Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, responsive pharmacy e-commerce application built with React, Vite, and Tailwind CSS.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- ✨ Modern, responsive design with Tailwind CSS
+- 🎨 Customizable color scheme (see [COLORS.md](./COLORS.md))
+- 🧭 React Router for navigation
+- 📱 Mobile-first responsive design
+- 🎯 Arabic language support (RTL ready)
+- ⚡ Fast development with Vite
+- 🎨 Beautiful UI with React Icons
 
-## React Compiler
+## 🛠️ Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React 19** - UI framework
+- **Vite** - Build tool & dev server
+- **Tailwind CSS** - Utility-first CSS framework
+- **React Router DOM** - Client-side routing
+- **React Icons** - Icon library
+- **PostCSS & Autoprefixer** - CSS processing
 
-## Expanding the ESLint configuration
+## 📦 Installation
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## 🎨 Customizing Colors
+
+This project uses a flexible color system. See **[COLORS.md](./COLORS.md)** for detailed instructions on how to customize the color scheme.
+
+Quick example:
+
+```javascript
+// tailwind.config.js
+primary: {
+  500: '#YOUR_COLOR_HERE',
+}
+```
+
+## 📁 Project Structure
+
+```
+pharma-test/
+├── public/              # Static assets
+├── src/
+│   ├── assets/         # Images, logos, etc.
+│   ├── components/     # React components
+│   │   ├── Navbar.jsx
+│   │   └── Hero.jsx
+│   ├── App.jsx         # Main app component with routing
+│   ├── main.jsx        # Entry point
+│   └── index.css       # Global styles & Tailwind directives
+├── tailwind.config.js  # Tailwind configuration & color variables
+├── postcss.config.js   # PostCSS configuration
+├── vite.config.js      # Vite configuration
+└── COLORS.md          # Color customization guide
+```
+
+## 🧭 Current Routes
+
+- `/` - Home page with hero section
+- `/categories` - Product categories (placeholder)
+- `/offers` - Special offers (placeholder)
+- `/pharmacies` - Pharmacy locations (placeholder)
+
+## 🔧 Development
+
+The navbar currently includes:
+
+- Logo (center)
+- Navigation links (Arabic, RTL)
+- Mobile responsive menu
+- Reserved space for future features (search, cart, user menu)
+
+## 📝 Next Steps
+
+- [ ] Add search functionality
+- [ ] Implement shopping cart
+- [ ] Add user authentication
+- [ ] Create product listing pages
+- [ ] Add product detail pages
+- [ ] Implement checkout flow
+
+## 📄 License
+
+This project is private and proprietary.
+
+---
+
+Built with ❤️ for Al-Farmashiia

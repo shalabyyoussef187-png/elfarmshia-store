@@ -1,0 +1,98 @@
+export const categories = [
+  {
+    id: 1,
+    name: "Medicine",
+    nameAr: "الأدوية",
+    slug: "medicine",
+    image:
+      "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=300&fit=crop",
+    description: "Quality medications you can trust",
+    descriptionAr: "أدوية عالية الجودة يمكنك الوثوق بها",
+    icon: "IoMedkit",
+    color: "from-teal-400 to-cyan-500",
+  },
+  {
+    id: 2,
+    name: "Skin Care",
+    nameAr: "العناية بالبشرة",
+    slug: "skin-care",
+    image:
+      "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=300&fit=crop",
+    description: "Premium skin care products",
+    descriptionAr: "منتجات العناية بالبشرة الفاخرة",
+    icon: "IoHeart",
+    color: "from-pink-400 to-rose-500",
+  },
+  {
+    id: 3,
+    name: "Hair Care",
+    nameAr: "العناية بالشعر",
+    slug: "hair-care",
+    image:
+      "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=400&h=300&fit=crop",
+    description: "Professional hair care solutions",
+    descriptionAr: "حلول احترافية للعناية بالشعر",
+    icon: "IoColorPalette",
+    color: "from-purple-400 to-pink-500",
+  },
+  {
+    id: 4,
+    name: "Mom & Baby",
+    nameAr: "الأم والطفل",
+    slug: "mom-baby",
+    image:
+      "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&h=300&fit=crop",
+    description: "Gentle care for your loved ones",
+    descriptionAr: "عناية لطيفة لأحبائك",
+    icon: "IoGift",
+    color: "from-blue-400 to-indigo-500",
+  },
+  {
+    id: 5,
+    name: "Vitamins & Supplements",
+    nameAr: "الفيتامينات والمكملات",
+    slug: "vitamins-supplements",
+    image:
+      "https://images.unsplash.com/photo-1550572017-4f0d6bd27ed6?w=400&h=300&fit=crop",
+    description: "Boost your health naturally",
+    descriptionAr: "عزز صحتك بشكل طبيعي",
+    icon: "IoNutrition",
+    color: "from-emerald-400 to-teal-500",
+  },
+  {
+    id: 6,
+    name: "Medical Equipment",
+    nameAr: "الأجهزة الطبية",
+    slug: "medical-equipment",
+    image:
+      "https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=400&h=300&fit=crop",
+    description: "Advanced health monitoring devices",
+    descriptionAr: "أجهزة متقدمة لمراقبة الصحة",
+    icon: "IoBandage",
+    color: "from-blue-400 to-cyan-500",
+  },
+  {
+    id: 7,
+    name: "Cosmetics",
+    nameAr: "مستحضرات التجميل",
+    slug: "cosmetics",
+    image:
+      "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=300&fit=crop",
+    description: "Beauty products for everyone",
+    descriptionAr: "منتجات تجميل للجميع",
+    icon: "IoSparkles",
+    color: "from-rose-400 to-pink-500",
+  },
+  {
+    id: 8,
+    name: "Sexual Health",
+    nameAr: "الصحة الجنسية",
+    slug: "sexual-health",
+    image:
+      "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=400&h=300&fit=crop",
+    description: "Discreet health solutions",
+    descriptionAr: "حلول صحية سرية",
+    icon: "IoShield",
+    color: "from-indigo-400 to-purple-500",
+  },
+];
