@@ -1,17 +1,59 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://pharma-api-flame.vercel.app/api";
+export const API_BASE_URL = "https://pharma-api-flame.vercel.app/api";
+
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop";
 
 /**
- * Fetch products from the API
+ * Compute the original (pre-discount) price for display purposes.
+ */
+const computeOriginalPrice = (product) => {
+  const current = parseFloat(product.price) || 0;
+  if (product.isOffer) {
+    if (product.offerDiscountPercent > 0) {
+      return Math.round(current / (1 - product.offerDiscountPercent / 100));
+    }
+    if (product.offerDiscountAmount > 0) {
+      return current + product.offerDiscountAmount;
+    }
+  }
+  return null;
+};
+
+/**
+ * Transform a raw API product into the shape used throughout the app.
+ * ⚠️  Field names corrected to match real API response:
+ *   product.id          (not _id)
+ *   product.imageUrl    (not image.url)
+ *   product.imageThumbnailUrl (not image.thumbnailUrl)
+ *   product.isAvailable (not inStock)
+ */
+export const transformProduct = (product) => ({
+  id:             product.id,
+  name:           product.name || "Unknown Product",
+  category:       product.category || null,
+  brand:          product.brand || null,
+  price:          parseFloat(product.price) || 0,
+  originalPrice:  computeOriginalPrice(product),
+  image:          product.imageUrl || FALLBACK_IMAGE,
+  thumbnailUrl:   product.imageThumbnailUrl || null,
+  isAvailable:    product.isAvailable !== false,
+  isBestSeller:   product.isBestSeller || false,
+  isOffer:        product.isOffer || false,
+  discount:       product.isOffer ? (product.offerDiscountPercent || 0) : 0,
+  discountAmount: product.isOffer ? (product.offerDiscountAmount || 0) : 0,
+});
+
+/**
+ * Fetch products from the API.
  * @param {Object} params - Query parameters
- * @param {number} params.page - Page number (default: 1)
- * @param {number} params.limit - Items per page (default: 20)
- * @param {string} params.category - Filter by category
- * @param {string} params.brand - Filter by brand
- * @param {string} params.search - Search query
- * @param {boolean} params.transform - Apply transformation (default: false)
- * @returns {Promise<{data: Array, pagination: Object}>}
+ * @param {number} params.page
+ * @param {number} params.limit
+ * @param {string} params.category
+ * @param {string} params.brand
+ * @param {string} params.search
+ * @returns {Promise<{ data: Array, pagination: Object }>}
  */
 export const fetchProducts = async ({
   page = 1,
@@ -19,119 +61,66 @@ export const fetchProducts = async ({
   category = "",
   brand = "",
   search = "",
-  transform = false,
 } = {}) => {
-  try {
-    const params = { page, limit };
-    if (category) params.category = category;
-    if (brand) params.brand = brand;
-    if (search) params.search = search;
+  const params = { page, limit };
+  if (category) params.category = category;
+  if (brand) params.brand = brand;
+  if (search) params.search = search;
 
-    const response = await axios.get(`${API_BASE_URL}/products`, { params });
+  const response = await axios.get(`${API_BASE_URL}/products`, { params });
 
-    // Validate response structure
-    if (response.data?.success && Array.isArray(response.data.data)) {
-      return {
-        data: transform
-          ? response.data.data.map(transformProduct)
-          : response.data.data,
-        pagination: response.data.pagination || null,
-      };
-    }
-
-    throw new Error("Invalid response structure");
-  } catch (error) {
-    console.error("Error fetching products:", error);
-    throw error;
+  if (response.data?.success && Array.isArray(response.data.data)) {
+    return {
+      data: response.data.data,
+      pagination: response.data.pagination || null,
+    };
   }
+
+  throw new Error("Invalid response structure from /api/products");
 };
 
 /**
- * Fetch best seller products (top 8 products)
- * @returns {Promise<Array>}
+ * Fetch ALL products (up to limit=35) for home page in one shot.
+ * Caller can filter by isBestSeller / isOffer client-side.
+ */
+export const fetchAllProducts = async (limit = 35) => {
+  const response = await fetchProducts({ page: 1, limit });
+  return response.data.map(transformProduct);
+};
+
+/**
+ * Fetch best-seller products (isBestSeller flag).
+ * Reuses fetchAllProducts — no extra network call if used with useHomeData.
  */
 export const fetchBestSellers = async () => {
-  try {
-    const response = await fetchProducts({ page: 1, limit: 8 });
-    return response.data.map(transformProduct);
-  } catch (error) {
-    console.error("Error fetching best sellers:", error);
-    throw error;
-  }
+  const all = await fetchAllProducts(35);
+  const sellers = all.filter((p) => p.isBestSeller);
+  return sellers.length > 0 ? sellers : all.slice(0, 8);
 };
 
 /**
- * Fetch products with discounts (filter by isOffer flag)
- * @returns {Promise<Array>}
+ * Fetch discounted / offer products (isOffer flag).
+ * Reuses fetchAllProducts — no extra network call if used with useHomeData.
  */
 export const fetchDiscountProducts = async () => {
-  try {
-    const response = await fetchProducts({ page: 1, limit: 8 });
-    // Filter products that have offers
-    const discountedProducts = response.data.filter(
-      (product) => product.isOffer === true,
-    );
-    return discountedProducts.slice(0, 8).map(transformProduct);
-  } catch (error) {
-    console.error("Error fetching discount products:", error);
-    throw error;
-  }
+  const all = await fetchAllProducts(35);
+  return all.filter((p) => p.isOffer).slice(0, 8);
 };
 
 /**
- * Transform product data for consistent use across the app
- * @param {Object} product - Raw product from API
- * @returns {Object} - Transformed product
+ * Fetch a single product by ID.
  */
-export const transformProduct = (product) => {
-  // Extract image URL properly
-  const imageUrl =
-    product.image?.url ||
-    product.image ||
-    "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop";
-
-  // Debug: Log image transformation
-  console.log("Transforming product:", {
-    id: product._id,
-    name: product.name,
-    originalImage: product.image,
-    extractedUrl: imageUrl,
-    isOffer: product.isOffer,
-    offerDiscountPercent: product.offerDiscountPercent,
-    offerDiscountAmount: product.offerDiscountAmount,
-  });
-
-  // All products in database are available (no stock check needed)
-  // Use API's isOffer flag and discount values
-  const discountPercent = product.isOffer
-    ? product.offerDiscountPercent || 0
-    : 0;
-  const discountAmount = product.isOffer ? product.offerDiscountAmount || 0 : 0;
-  const currentPrice = parseFloat(product.price) || 0;
-
-  // Calculate original price from discount
-  const originalPrice =
-    discountPercent > 0
-      ? Math.round(currentPrice / (1 - discountPercent / 100))
-      : discountAmount > 0
-        ? currentPrice + discountAmount
-        : null;
-
-  return {
-    id: product._id,
-    name: product.name || "Unknown Product",
-    category: product.category || "Uncategorized",
-    brand: product.brand || "Generic",
-    price: currentPrice,
-    originalPrice: originalPrice,
-    image: imageUrl,
-    thumbnailUrl: product.image?.thumbnailUrl || product.image?.url || null,
-    productUrl: product.productUrl || "#",
-    // Offer/Discount info from API
-    isOffer: product.isOffer || false,
-    discount: discountPercent,
-    discountAmount: discountAmount,
-    // All products in DB are available by default
-    inStock: true,
-  };
+export const getProductById = async (id) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/products/${id}`);
+    if (response.data?.success && response.data.data) {
+      return transformProduct(response.data.data);
+    }
+  } catch (err) {
+    console.error("Failed to fetch product by ID, trying fallback list:", err);
+  }
+  // Fallback
+  const all = await fetchAllProducts(50);
+  return all.find((p) => String(p.id) === String(id) || String(p._id) === String(id)) || null;
 };
+

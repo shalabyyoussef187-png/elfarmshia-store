@@ -1,53 +1,37 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, ArrowLeft } from "lucide-react";
-import { getCategoryImage } from "../../utils/categoryImages";
 
+/**
+ * Minimalist Icon Category Card matching reference image:
+ * Uses crisp green line vector icons inside elevated white circular containers.
+ */
 const CategoryCard = ({ category, language = "en" }) => {
-  const imageUrl = getCategoryImage(category.slug, category.image);
+  const isRtl = language === "ar";
+  const name = isRtl ? category.nameAr : category.name;
 
   return (
     <Link
       to={`/category/${category.slug}`}
-      className="group relative bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500"
+      className="group relative flex flex-col items-center justify-center p-5 rounded-2xl
+        bg-[#f8faf9] border border-emerald-900/5 hover:border-emerald-500/30 hover:bg-white
+        hover:shadow-xl hover:shadow-emerald-900/8 hover:-translate-y-1 transition-all duration-300 cursor-pointer text-center aspect-square"
     >
-      {/* Image Container with Zoom Effect */}
-      <div className="relative aspect-4/3 overflow-hidden bg-linear-to-br from-gray-50 to-gray-100">
-        <img
-          src={imageUrl}
-          alt={language === "ar" ? category.nameAr : category.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-          loading="lazy"
-        />
-
-        {/* Soft Gradient Overlay */}
-        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent"></div>
-
-        {/* Content Area */}
-        <div className="absolute bottom-0 left-0 right-0 p-8">
-          {/* Category Title - Editorial Style */}
-          <h3 className="text-white text-3xl font-bold mb-2 tracking-tight leading-tight">
-            {language === "ar" ? category.nameAr : category.name}
-          </h3>
-
-          {/* Subtitle - Softer */}
-          <p className="text-white/80 text-sm font-light mb-4 leading-relaxed">
-            {language === "ar" ? category.descriptionAr : category.description}
-          </p>
-
-          {/* Elegant Arrow Indicator */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md bg-white/20 border border-white/30 text-white text-sm font-medium opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-500">
-            <span>{language === "ar" ? "استكشف" : "Explore"}</span>
-            {language === "ar" ? (
-              <ArrowLeft size={16} strokeWidth={2.5} />
-            ) : (
-              <ArrowRight size={16} strokeWidth={2.5} />
-            )}
-          </div>
-        </div>
+      {/* White Circular Container with Custom Green Icon */}
+      <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-white shadow-xs border border-emerald-100/70 flex items-center justify-center mb-4 transition-all duration-300 group-hover:scale-105 group-hover:border-emerald-300 group-hover:shadow-md overflow-hidden p-4">
+        {category.iconImg ? (
+          <img
+            src={category.iconImg}
+            alt={name}
+            className="w-full h-full object-contain filter contrast-125 group-hover:scale-110 transition-transform duration-300"
+          />
+        ) : (
+          category.icon && <category.icon size={44} strokeWidth={1.5} className="text-emerald-700" />
+        )}
       </div>
 
-      {/* Subtle Lift Effect */}
-      <div className="absolute inset-0 rounded-3xl ring-1 ring-black/5 group-hover:ring-teal-500/20 transition-all duration-500"></div>
+      {/* Category Title in Almarai Font */}
+      <h3 className="text-xs sm:text-sm font-extrabold text-emerald-900 group-hover:text-emerald-600 transition-colors leading-tight px-1 line-clamp-2">
+        {name}
+      </h3>
     </Link>
   );
 };

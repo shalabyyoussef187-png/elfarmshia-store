@@ -2,7 +2,6 @@ import BlogCard from "../common/BlogCard";
 import SectionHeader from "../common/SectionHeader";
 
 const BlogSection = ({ language = "en" }) => {
-  // Sample blog posts - in a real app, this would come from an API
   const blogPosts = [
     {
       id: 1,
@@ -97,7 +96,7 @@ const BlogSection = ({ language = "en" }) => {
         />
 
         {/* Blog Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {blogPosts.map((post) => (
             <BlogCard
               key={post.id}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   IoSearch,
@@ -15,7 +15,14 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [language, setLanguage] = useState("ar"); // 'ar' or 'en'
   const [searchQuery, setSearchQuery] = useState("");
+  const [scrolled, setScrolled] = useState(false);
   const { totalItems } = useCart();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const navLinks = [
     { name: "الصيدليات", nameEn: "Pharmacies", path: "/pharmacies" },
@@ -32,19 +39,29 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white/95 backdrop-blur-lg shadow-lg border-b border-neutral-100 sticky top-0 z-50">
+    <nav
+      className={`sticky top-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? "bg-white/95 backdrop-blur-lg shadow-lg border-b border-neutral-100"
+          : "bg-transparent border-b border-white/0"
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex items-center justify-between h-24 md:h-28 gap-6">
+        <div className="flex items-center justify-between h-20 md:h-24 gap-6">
           {/* Left: Navigation Links - Desktop only */}
           <div className="hidden md:flex items-center gap-8 lg:gap-10 flex-1">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
-                className="text-neutral-600 hover:text-primary-600 font-semibold text-sm lg:text-base transition-all duration-300 relative group cursor-pointer tracking-wide"
+                className={`font-semibold text-sm lg:text-base transition-all duration-300 relative group cursor-pointer tracking-wide ${
+                  scrolled ? "text-neutral-600 hover:text-primary-600" : "text-white/80 hover:text-white"
+                }`}
               >
                 {language === "ar" ? link.name : link.nameEn}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-linear-to-r from-primary-500 to-primary-600 group-hover:w-full transition-all duration-300 rounded-full"></span>
+                <span className={`absolute -bottom-1 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300 rounded-full ${
+                  scrolled ? "bg-primary-500" : "bg-white"
+                }`}></span>
               </Link>
             ))}
           </div>
@@ -84,36 +101,45 @@ const Navbar = () => {
               </button>
             </div>
 
-            {/* Cart Icon with Badge - Premium Style */}
+            {/* Cart Icon with Badge */}
             <Link
               to="/cart"
-              className="group relative p-2.5 rounded-xl bg-neutral-50 hover:bg-primary-50 text-neutral-600 hover:text-primary-600 transition-all duration-300 cursor-pointer border border-transparent hover:border-primary-200"
+              className={`group relative p-2.5 rounded-xl transition-all duration-300 cursor-pointer border ${
+                scrolled
+                  ? "bg-neutral-50 hover:bg-primary-50 text-neutral-600 hover:text-primary-600 border-transparent hover:border-primary-200"
+                  : "bg-white/10 hover:bg-white/20 text-white border-white/10 hover:border-white/20"
+              }`}
             >
               <IoCart className="w-6 h-6" />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-linear-to-r from-red-500 to-rose-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-rose-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg animate-pulse">
                   {totalItems > 9 ? "9+" : totalItems}
                 </span>
               )}
-              <div className="absolute inset-0 bg-primary-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </Link>
 
-            {/* Login Icon - Premium Style */}
-            <button className="group relative p-2.5 rounded-xl bg-neutral-50 hover:bg-primary-50 text-neutral-600 hover:text-primary-600 transition-all duration-300 cursor-pointer border border-transparent hover:border-primary-200">
+            {/* Login Icon */}
+            <button className={`group relative p-2.5 rounded-xl transition-all duration-300 cursor-pointer border ${
+              scrolled
+                ? "bg-neutral-50 hover:bg-primary-50 text-neutral-600 hover:text-primary-600 border-transparent hover:border-primary-200"
+                : "bg-white/10 hover:bg-white/20 text-white border-white/10 hover:border-white/20"
+            }`}>
               <IoPersonOutline className="w-6 h-6" />
-              <div className="absolute inset-0 bg-primary-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
 
-            {/* Language Switcher - Premium Style */}
+            {/* Language Switcher */}
             <button
               onClick={toggleLanguage}
-              className="group relative px-4 py-2.5 rounded-xl bg-neutral-50 hover:bg-primary-50 text-neutral-600 hover:text-primary-600 transition-all duration-300 flex items-center gap-2 cursor-pointer border border-transparent hover:border-primary-200"
+              className={`group relative px-4 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2 cursor-pointer border ${
+                scrolled
+                  ? "bg-neutral-50 hover:bg-primary-50 text-neutral-600 hover:text-primary-600 border-transparent hover:border-primary-200"
+                  : "bg-white/10 hover:bg-white/20 text-white border-white/10 hover:border-white/20"
+              }`}
             >
               <IoLanguage className="w-5 h-5" />
               <span className="text-xs font-bold tracking-wider">
                 {language.toUpperCase()}
               </span>
-              <div className="absolute inset-0 bg-primary-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
           </div>
 

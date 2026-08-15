@@ -30,6 +30,7 @@ import Returns from "./pages/Returns";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import WhatsAppButton from "./components/common/WhatsAppButton";
 
 function AppContent() {
   const location = useLocation();
@@ -39,7 +40,7 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {!isAuthPage && <Navbar />}
-      <main className="flex-1">
+      <main className="flex-1 pt-24">
         <PageTransition>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -71,6 +72,7 @@ function AppContent() {
         </PageTransition>
       </main>
       {!isAuthPage && <Footer />}
+      <WhatsAppButton />
     </div>
   );
 }

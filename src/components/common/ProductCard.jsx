@@ -1,14 +1,27 @@
 import { useCart } from "../../context/CartContext";
 import { useToast } from "../../context/ToastContext";
-import { ShoppingCart, Check, Heart } from "lucide-react";
+import { ShoppingCart, Check, Heart, Star, Leaf } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop";
+
+/**
+ * Pristine Light Luxury Glass Product Card
+ * Exact layout from the reference image, rendered in a crisp, ultra-clean light aesthetic!
+ */
 const ProductCard = ({ product, language = "en" }) => {
   const { addToCart, isInCart } = useCart();
   const { success } = useToast();
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [showAddedAnimation, setShowAddedAnimation] = useState(false);
+  const [selectedVariant, setSelectedVariant] = useState(0);
+
+  const productId = product._id || product.id;
+  const inCart = isInCart(productId);
+  const inStock = product.isAvailable !== false && product.inStock !== false;
+  const imageUrl = product.image || FALLBACK_IMAGE;
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -27,116 +40,158 @@ const ProductCard = ({ product, language = "en" }) => {
     setIsWishlisted(!isWishlisted);
   };
 
-  // Handle both _id and id
-  const productId = product._id || product.id;
-  const inCart = isInCart(productId);
-  // All products in database are available
-  const inStock = product.inStock !== false;
-
   return (
     <Link
       to={`/product/${productId}`}
-      className="group relative bg-white rounded-3xl shadow-sm hover:shadow-xl border border-gray-100/50 hover:border-teal-200/50 transition-all duration-500 overflow-hidden flex flex-col h-full"
+      className="group relative flex flex-col h-full rounded-3xl p-4
+        bg-white border border-gray-100/90
+        shadow-sm hover:shadow-xl hover:shadow-teal-950/8
+        hover:border-teal-300 hover:-translate-y-1.5 transition-all duration-400 overflow-hidden cursor-pointer"
     >
-      {/* Discount Badge - Refined */}
-      {product.discount > 0 && (
-        <div className="absolute top-4 left-4 z-10 backdrop-blur-md bg-red-500/90 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
-          -{product.discount}%
-        </div>
-      )}
-
-      {/* Wishlist Button - Softer */}
-      <button
-        onClick={toggleWishlist}
-        className="absolute top-4 right-4 z-10 p-2.5 backdrop-blur-md bg-white/80 rounded-full hover:bg-white transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer active:scale-90 hover:scale-110"
-      >
-        <Heart
-          size={18}
-          strokeWidth={2}
-          className={`transition-colors ${
-            isWishlisted ? "fill-red-500 text-red-500" : "text-gray-400"
-          }`}
-        />
-      </button>
-
-      {/* Premium Image Container */}
-      <div className="relative aspect-square bg-linear-to-br from-gray-50 to-gray-100/50 overflow-hidden rounded-t-3xl">
-        <div className="absolute inset-0 flex items-center justify-center p-8">
-          <img
-            src={product.image}
-            alt={product.name}
-            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 ease-out"
-            loading="lazy"
+      {/* ── Inner Light Viewport for Product Image ── */}
+      <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-gradient-to-b from-slate-50/90 via-teal-50/20 to-slate-50 p-5 flex items-center justify-center border border-slate-100">
+        {/* Wishlist Heart Button */}
+        <button
+          onClick={toggleWishlist}
+          className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-white/90 backdrop-blur-md border border-teal-100 flex items-center justify-center shadow-xs hover:scale-110 active:scale-95 transition-all cursor-pointer"
+        >
+          <Heart
+            size={17}
+            className={`transition-colors ${
+              isWishlisted
+                ? "fill-teal-600 text-teal-600"
+                : "text-teal-600/70 hover:text-teal-700"
+            }`}
           />
-        </div>
+        </button>
+
+        {/* Product Image */}
+        <img
+          src={imageUrl}
+          alt={product.name}
+          className="w-full h-full object-contain filter drop-shadow-md transition-transform duration-700 ease-out group-hover:scale-108"
+          loading="lazy"
+          onError={(e) => {
+            e.target.src = FALLBACK_IMAGE;
+          }}
+        />
 
         {!inStock && (
-          <div className="absolute inset-0 backdrop-blur-sm bg-white/60 flex items-center justify-center">
-            <span className="bg-gray-800 text-white px-4 py-2 rounded-full text-sm font-medium">
+          <div className="absolute inset-0 bg-white/80 backdrop-blur-xs flex items-center justify-center">
+            <span className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs font-bold border border-gray-200">
               {language === "ar" ? "غير متوفر" : "Out of Stock"}
             </span>
           </div>
         )}
       </div>
 
-      {/* Content Area - Refined Spacing */}
-      <div className="p-6 flex flex-col flex-1">
-        {/* Category Tag - Subtle */}
-        <div className="mb-3">
-          <span className="inline-block text-xs font-medium text-teal-700 bg-teal-50 px-3 py-1.5 rounded-full">
-            {product.category || (language === "ar" ? "عام" : "General")}
-          </span>
-        </div>
-
-        {/* Product Name - Strong Typography */}
-        <h3 className="text-lg font-bold text-gray-900 mb-3 line-clamp-2 leading-snug group-hover:text-teal-600 transition-colors">
+      {/* ── Card Content Area ── */}
+      <div className="flex flex-col flex-1 pt-4 px-1 pb-1">
+        {/* Product Title in Almarai Font */}
+        <h3 className="text-lg font-extrabold text-gray-900 mb-1 line-clamp-1 leading-snug tracking-tight group-hover:text-teal-700 transition-colors">
           {product.name}
         </h3>
 
-        {/* Brand - New */}
-        {product.brand && (
-          <p className="text-sm text-gray-500 mb-4">
-            {language === "ar" ? "العلامة التجارية:" : "Brand:"}{" "}
-            <span className="font-medium text-gray-700">{product.brand}</span>
-          </p>
-        )}
+        {/* Short Subtitle / Description */}
+        <p className="text-xs text-gray-500 leading-relaxed line-clamp-1 mb-2.5 font-normal">
+          {product.brand
+            ? `${language === "ar" ? "العلامة التجارية: " : "Brand: "}${product.brand}`
+            : language === "ar"
+              ? "تركيبة متطورة عالية الجودة لصحتك اليومية"
+              : "A powerful daily complex for health and vitality"}
+        </p>
 
-        {/* Spacer */}
-        <div className="flex-1"></div>
+        {/* Ratings Row */}
+        <div className="flex items-center gap-1.5 mb-3">
+          <div className="flex items-center gap-0.5 text-amber-400">
+            <Star size={13} fill="currentColor" />
+            <Star size={13} fill="currentColor" />
+            <Star size={13} fill="currentColor" />
+            <Star size={13} fill="currentColor" />
+            <Star size={13} fill="currentColor" />
+          </div>
+          <span className="text-xs font-black text-gray-900">4.8</span>
+          <span className="text-[11px] text-gray-400 font-normal">
+            (1021 {language === "ar" ? "تقييم" : "reviews"})
+          </span>
+        </div>
 
-        {/* Price - Excellent Hierarchy */}
-        <div className="mb-4">
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-teal-600">
-              {product.price != null ? product.price.toFixed(2) : "N/A"}
+        {/* Price Row */}
+        <div className="flex items-baseline gap-2 mb-3.5">
+          <span className="text-2xl font-black text-teal-700 tracking-tight">
+            {product.price != null ? product.price.toFixed(0) : "N/A"}
+          </span>
+          <span className="text-xs font-extrabold text-teal-700 uppercase">
+            {language === "ar" ? "ج.م" : "EGP"}
+          </span>
+          {product.originalPrice && product.originalPrice > product.price && (
+            <span className="text-xs text-gray-400 line-through font-normal">
+              {product.originalPrice.toFixed(0)}
             </span>
-            <span className="text-sm font-medium text-gray-500">
-              {language === "ar" ? "ج.م" : "EGP"}
+          )}
+          {product.discount > 0 && (
+            <span className="text-xs font-extrabold text-red-500 bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
+              (-{product.discount}%)
             </span>
-            {product.originalPrice && product.originalPrice > product.price && (
-              <span className="text-sm text-gray-400 line-through font-light ml-1">
-                {product.originalPrice.toFixed(2)}
-              </span>
-            )}
+          )}
+        </div>
+
+        {/* Feature Pills (Natural badge & Capsule selector) */}
+        <div className="flex items-center justify-between gap-2 mb-4">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-bold">
+            <Leaf size={13} />
+            <span>{language === "ar" ? "طبيعي 100%" : "Natural"}</span>
+          </div>
+
+          <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200/70 text-[11px]">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                setSelectedVariant(0);
+              }}
+              className={`px-2.5 py-1 rounded-lg font-extrabold transition-all cursor-pointer ${
+                selectedVariant === 0
+                  ? "bg-white text-teal-800 shadow-xs"
+                  : "text-gray-500 hover:text-gray-900"
+              }`}
+            >
+              60 Cap
+            </button>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                setSelectedVariant(1);
+              }}
+              className={`px-2.5 py-1 rounded-lg font-extrabold transition-all cursor-pointer ${
+                selectedVariant === 1
+                  ? "bg-white text-teal-800 shadow-xs"
+                  : "text-gray-500 hover:text-gray-900"
+              }`}
+            >
+              120 Cap
+            </button>
           </div>
         </div>
 
-        {/* Elegant CTA Button */}
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* ── Glowing Teal CTA Button ── */}
         <button
           onClick={handleAddToCart}
           disabled={!inStock}
-          className={`w-full py-3.5 rounded-full font-semibold text-sm transition-all duration-300 flex items-center justify-center gap-2 shadow-sm hover:shadow-md ${
+          className={`w-full py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-teal-600/20 ${
             inCart
-              ? "bg-emerald-500 text-white hover:bg-emerald-600"
+              ? "bg-emerald-600 text-white hover:bg-emerald-700"
               : inStock
-                ? "bg-teal-600 text-white hover:bg-teal-700"
-                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                ? "bg-teal-600 hover:bg-teal-700 text-white hover:shadow-lg hover:shadow-teal-600/30 active:scale-95"
+                : "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
           }`}
         >
           {showAddedAnimation ? (
             <>
               <Check size={18} strokeWidth={2.5} />
-              {language === "ar" ? "تمت الإضافة" : "Added"}
+              {language === "ar" ? "تمت الإضافة ✓" : "Added ✓"}
             </>
           ) : inCart ? (
             <>
@@ -145,8 +200,8 @@ const ProductCard = ({ product, language = "en" }) => {
             </>
           ) : (
             <>
-              <ShoppingCart size={18} strokeWidth={2} />
-              {language === "ar" ? "أضف للسلة" : "Add to Cart"}
+              <span>{language === "ar" ? "أضف للسلة" : "Add to Cart"}</span>
+              <ShoppingCart size={16} strokeWidth={2.5} />
             </>
           )}
         </button>

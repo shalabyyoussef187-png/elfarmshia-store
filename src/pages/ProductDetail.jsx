@@ -1,39 +1,78 @@
 import { useParams, Link } from "react-router-dom";
-import { useState } from "react";
-import { getProductById } from "../data/products";
+import { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
+import { useToast } from "../context/ToastContext";
+import { useLanguage } from "../context/LanguageContext";
+import { getProductById } from "../services/api/products";
 import {
-  IoCart,
-  IoCheckmark,
-  IoHeart,
-  IoHeartOutline,
-  IoStar,
-  IoArrowBack,
-  IoArrowForward,
-} from "react-icons/io5";
-import Button from "../components/common/Button";
+  ShoppingCart,
+  Check,
+  Heart,
+  Star,
+  Plus,
+  Minus,
+  ShieldCheck,
+  Truck,
+  RotateCcw,
+  Leaf,
+  ArrowRight,
+  ArrowLeft,
+} from "lucide-react";
+
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=80";
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const product = getProductById(id);
+  const { language } = useLanguage();
+  const isRtl = language === "ar";
   const { addToCart, isInCart } = useCart();
-  const [language, setLanguage] = useState("en");
+  const { success } = useToast();
+
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [showAddedAnimation, setShowAddedAnimation] = useState(false);
 
+  useEffect(() => {
+    const fetchItem = async () => {
+      setLoading(true);
+      try {
+        const item = await getProductById(id);
+        setProduct(item);
+      } catch (err) {
+        console.error("Failed to load product detail:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (id) fetchItem();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#f8faf9] flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-teal-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-neutral-900 mb-4">
-            {language === "ar" ? "المنتج غير موجود" : "Product Not Found"}
+      <div className="min-h-screen bg-[#f8faf9] flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl p-8 text-center border border-gray-100 shadow-md max-w-md">
+          <h1 className="text-2xl font-black text-emerald-950 mb-3">
+            {isRtl ? "المنتج غير موجود" : "Product Not Found"}
           </h1>
+          <p className="text-xs text-gray-500 mb-6">
+            {isRtl ? "عذراً، لم نتمكن من العثور على هذا المنتج" : "Sorry, we could not find this product"}
+          </p>
           <Link
-            to="/"
-            className="text-primary-600 hover:text-primary-700 font-semibold"
+            to="/products"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-teal-600 text-white font-extrabold text-xs rounded-full shadow-md"
           >
-            {language === "ar" ? "العودة للرئيسية" : "Back to Home"}
+            {isRtl ? "العودة للمتجر" : "Back to Store"}
           </Link>
         </div>
       </div>
@@ -43,239 +82,207 @@ const ProductDetail = () => {
   const handleAddToCart = () => {
     addToCart(product, quantity);
     setShowAddedAnimation(true);
+    success(
+      isRtl
+        ? `تمت إضافة ${quantity} من ${product.name} إلى السلة`
+        : `Added ${quantity} of ${product.name} to cart`,
+    );
     setTimeout(() => setShowAddedAnimation(false), 2000);
   };
 
-  const inCart = isInCart(product.id);
+  const inCart = isInCart(product._id || product.id);
+  const inStock = product.isAvailable !== false && product.inStock !== false;
+  const imageUrl = product.image || FALLBACK_IMAGE;
 
   return (
-    <div className="min-h-screen bg-neutral-50 py-8">
+    <div className="min-h-screen bg-[#f8faf9] py-12" dir={isRtl ? "rtl" : "ltr"}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
         {/* Breadcrumb */}
-        <div className="mb-6 flex items-center gap-2 text-sm text-neutral-600">
-          <Link to="/" className="hover:text-primary-600">
-            {language === "ar" ? "الرئيسية" : "Home"}
-          </Link>
+        <div className="mb-6 flex items-center gap-2 text-xs text-gray-500 font-medium">
+          <Link to="/" className="hover:text-teal-700">{isRtl ? "الرئيسية" : "Home"}</Link>
           <span>/</span>
-          <Link
-            to={`/category/${product.category}`}
-            className="hover:text-primary-600"
-          >
-            {language === "ar" ? product.categoryNameAr : product.categoryName}
-          </Link>
+          <Link to="/products" className="hover:text-teal-700">{isRtl ? "المنتجات" : "Products"}</Link>
           <span>/</span>
-          <span className="text-neutral-900 font-semibold">
-            {language === "ar" ? product.nameAr : product.name}
-          </span>
+          <span className="text-gray-900 font-extrabold line-clamp-1">{product.name}</span>
         </div>
 
-        {/* Product Detail Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 bg-white rounded-2xl p-8 shadow-lg">
-          {/* Image Section */}
-          <div className="relative">
-            {product.discount > 0 && (
-              <div className="absolute top-4 left-4 z-10 bg-linear-to-r from-red-500 to-rose-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
-                {product.discount}% OFF
-              </div>
-            )}
-            <div className="aspect-square rounded-2xl overflow-hidden bg-neutral-100">
+        {/* Product Detail Card */}
+        <div className="bg-white rounded-3xl p-6 sm:p-10 border border-gray-100 shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-10">
+          
+          {/* Image Section (5 Cols) */}
+          <div className="lg:col-span-5 flex flex-col items-center justify-center">
+            <div className="relative w-full aspect-square rounded-3xl bg-gradient-to-b from-slate-50 via-teal-50/20 to-slate-50 border border-slate-100 p-8 flex items-center justify-center overflow-hidden">
+              {product.discount > 0 && (
+                <div className="absolute top-4 left-4 z-10 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-black shadow-xs">
+                  -{product.discount}% OFF
+                </div>
+              )}
+
+              <button
+                onClick={() => setIsWishlisted(!isWishlisted)}
+                className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/90 backdrop-blur-md border border-teal-100 flex items-center justify-center shadow-xs hover:scale-110 transition-transform cursor-pointer"
+              >
+                <Heart size={18} className={isWishlisted ? "fill-teal-600 text-teal-600" : "text-teal-600/70"} />
+              </button>
+
               <img
-                src={product.image}
-                alt={language === "ar" ? product.nameAr : product.name}
-                className="w-full h-full object-cover"
+                src={imageUrl}
+                alt={product.name}
+                className="w-full h-full object-contain filter drop-shadow-lg"
+                onError={(e) => {
+                  e.target.src = FALLBACK_IMAGE;
+                }}
               />
             </div>
           </div>
 
-          {/* Details Section */}
-          <div className="flex flex-col">
+          {/* Details Section (7 Cols) */}
+          <div className="lg:col-span-7 flex flex-col">
+            
             {/* Category Tag */}
-            <span className="inline-block text-sm font-semibold text-primary-600 bg-primary-50 px-3 py-1 rounded-full mb-4 self-start">
-              {language === "ar"
-                ? product.categoryNameAr
-                : product.categoryName}
-            </span>
+            {product.category && (
+              <span className="inline-block text-xs font-extrabold text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded-full mb-3 self-start">
+                {product.category}
+              </span>
+            )}
 
-            {/* Product Name */}
-            <h1 className="text-4xl font-bold text-neutral-900 mb-2">
-              {language === "ar" ? product.nameAr : product.name}
+            {/* Product Title */}
+            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 leading-tight mb-2 tracking-tight">
+              {product.name}
             </h1>
 
             {/* Brand */}
-            <p className="text-lg text-neutral-600 mb-4">
-              {language === "ar" ? "العلامة التجارية:" : "Brand:"}{" "}
-              <span className="font-semibold text-neutral-900">
-                {product.brand}
-              </span>
-            </p>
+            {product.brand && (
+              <p className="text-xs text-gray-500 mb-4 font-medium">
+                {isRtl ? "العلامة التجارية: " : "Brand: "}
+                <span className="font-extrabold text-gray-800">{product.brand}</span>
+              </p>
+            )}
 
-            {/* Rating */}
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex items-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <IoStar
-                    key={i}
-                    className={`w-5 h-5 ${
-                      i < Math.floor(product.rating)
-                        ? "text-yellow-400"
-                        : "text-neutral-300"
-                    }`}
-                  />
-                ))}
+            {/* Ratings */}
+            <div className="flex items-center gap-2 mb-5">
+              <div className="flex items-center gap-0.5 text-amber-400">
+                <Star size={16} fill="currentColor" />
+                <Star size={16} fill="currentColor" />
+                <Star size={16} fill="currentColor" />
+                <Star size={16} fill="currentColor" />
+                <Star size={16} fill="currentColor" />
               </div>
-              <span className="text-neutral-600">
-                {product.rating} ({product.reviews}{" "}
-                {language === "ar" ? "تقييم" : "reviews"})
+              <span className="text-xs font-extrabold text-gray-900">4.9</span>
+              <span className="text-xs text-gray-400 font-normal">
+                (120 {isRtl ? "تقييم معتمد" : "verified reviews"})
               </span>
             </div>
 
-            {/* Price */}
-            <div className="mb-6">
-              <div className="flex items-center gap-4">
-                <span className="text-4xl font-bold text-primary-600">
-                  {product.price}{" "}
-                  <span className="text-xl">
-                    {language === "ar" ? "ج.م" : "EGP"}
-                  </span>
+            {/* Price Row */}
+            <div className="p-4 rounded-2xl bg-slate-50 border border-gray-100 mb-6">
+              <div className="flex items-baseline gap-3">
+                <span className="text-3xl font-black text-teal-700">
+                  {product.price != null ? product.price.toFixed(0) : "N/A"}
                 </span>
-                {product.originalPrice > product.price && (
-                  <span className="text-2xl text-neutral-400 line-through">
-                    {product.originalPrice}
+                <span className="text-sm font-extrabold text-teal-700 uppercase">
+                  {isRtl ? "ج.م" : "EGP"}
+                </span>
+                {product.originalPrice && product.originalPrice > product.price && (
+                  <span className="text-base text-gray-400 line-through font-normal">
+                    {product.originalPrice.toFixed(0)}
                   </span>
                 )}
               </div>
-              {product.originalPrice > product.price && (
-                <p className="text-emerald-600 font-semibold mt-2">
-                  {language === "ar" ? "وفّر" : "Save"}{" "}
-                  {product.originalPrice - product.price}{" "}
-                  {language === "ar" ? "ج.م" : "EGP"}
-                </p>
-              )}
             </div>
 
-            {/* Description */}
+            {/* Stock Status Badge */}
             <div className="mb-6">
-              <h3 className="font-bold text-lg text-neutral-900 mb-2">
-                {language === "ar" ? "الوصف" : "Description"}
-              </h3>
-              <p className="text-neutral-600 leading-relaxed">
-                {language === "ar"
-                  ? product.descriptionAr
-                  : product.description}
-              </p>
-            </div>
-
-            {/* Stock Status */}
-            <div className="mb-6">
-              {product.inStock ? (
-                <span className="inline-flex items-center gap-2 text-emerald-600 font-semibold">
-                  <IoCheckmark className="w-5 h-5" />
-                  {language === "ar" ? "متوفر في المخزون" : "In Stock"}
+              {inStock ? (
+                <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                  <Check size={14} strokeWidth={3} />
+                  {isRtl ? "متوفر في المخزن" : "In Stock - Ready to Ship"}
                 </span>
               ) : (
-                <span className="text-red-600 font-semibold">
-                  {language === "ar" ? "غير متوفر" : "Out of Stock"}
+                <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-100">
+                  {isRtl ? "غير متوفر حالياً" : "Currently Out of Stock"}
                 </span>
               )}
             </div>
 
-            {/* Quantity Selector */}
+            {/* Stepper Quantity Selector ([-] quantity [+]) */}
             <div className="mb-6">
-              <label className="block font-semibold text-neutral-900 mb-2">
-                {language === "ar" ? "الكمية" : "Quantity"}
+              <label className="block text-xs font-extrabold text-gray-900 uppercase tracking-wider mb-2">
+                {isRtl ? "حدد الكمية:" : "Select Quantity:"}
               </label>
-              <div className="flex items-center gap-4">
+
+              <div className="inline-flex items-center bg-slate-100 border border-slate-200/80 rounded-2xl p-1.5 shadow-xs">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-12 h-12 rounded-xl bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center font-bold text-xl transition-colors"
+                  disabled={quantity <= 1}
+                  className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-800 font-bold hover:bg-gray-50 disabled:opacity-40 transition-all cursor-pointer"
                 >
-                  -
+                  <Minus size={16} strokeWidth={2.5} />
                 </button>
-                <span className="text-2xl font-bold text-neutral-900 min-w-[3rem] text-center">
+
+                <span className="w-14 text-center font-black text-lg text-gray-900">
                   {quantity}
                 </span>
+
                 <button
                   onClick={() => setQuantity(quantity + 1)}
-                  className="w-12 h-12 rounded-xl bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center font-bold text-xl transition-colors"
+                  className="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center font-bold hover:bg-teal-700 transition-all cursor-pointer shadow-xs"
                 >
-                  +
+                  <Plus size={16} strokeWidth={2.5} />
                 </button>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-4 mb-6">
-              <Button
-                onClick={handleAddToCart}
-                disabled={!product.inStock}
-                className="flex-1"
-                icon={
-                  showAddedAnimation ? (
-                    <IoCheckmark className="w-5 h-5" />
-                  ) : (
-                    <IoCart className="w-5 h-5" />
-                  )
-                }
-              >
-                {showAddedAnimation
-                  ? language === "ar"
-                    ? "تمت الإضافة!"
-                    : "Added!"
-                  : inCart
-                    ? language === "ar"
-                      ? "أضف المزيد"
-                      : "Add More"
-                    : language === "ar"
-                      ? "أضف للسلة"
-                      : "Add to Cart"}
-              </Button>
+            {/* Action Button */}
+            <div className="mb-8">
               <button
-                onClick={() => setIsWishlisted(!isWishlisted)}
-                className="w-14 h-14 rounded-xl bg-neutral-100 hover:bg-red-50 flex items-center justify-center transition-colors cursor-pointer active:scale-90 hover:scale-110"
+                onClick={handleAddToCart}
+                disabled={!inStock}
+                className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-teal-600/20 active:scale-95 ${
+                  showAddedAnimation
+                    ? "bg-emerald-600 text-white"
+                    : inCart
+                      ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                      : inStock
+                        ? "bg-teal-600 hover:bg-teal-700 text-white hover:shadow-xl hover:shadow-teal-600/30"
+                        : "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
+                }`}
               >
-                {isWishlisted ? (
-                  <IoHeart className="w-6 h-6 text-red-500" />
+                {showAddedAnimation ? (
+                  <>
+                    <Check size={18} strokeWidth={2.5} />
+                    {isRtl ? "تمت الإضافة بنجاح ✓" : "Added Successfully ✓"}
+                  </>
                 ) : (
-                  <IoHeartOutline className="w-6 h-6 text-neutral-600" />
+                  <>
+                    <ShoppingCart size={18} strokeWidth={2.5} />
+                    {isRtl ? "أضف للسلة الآن" : "Add to Cart"}
+                  </>
                 )}
               </button>
             </div>
 
-            {/* Features */}
-            <div className="space-y-3 pt-6 border-t border-neutral-200">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center">
-                  <IoCheckmark className="w-5 h-5 text-primary-600" />
-                </div>
-                <span className="text-neutral-700">
-                  {language === "ar"
-                    ? "منتج أصلي 100%"
-                    : "100% Authentic Product"}
-                </span>
+            {/* Authentic Trust Points */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-6 border-t border-gray-100 text-xs">
+              <div className="flex items-center gap-2 text-gray-700 font-bold">
+                <ShieldCheck size={18} className="text-teal-600 shrink-0" />
+                <span>{isRtl ? "منتج أصلي 100%" : "100% Authentic"}</span>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center">
-                  <IoCheckmark className="w-5 h-5 text-primary-600" />
-                </div>
-                <span className="text-neutral-700">
-                  {language === "ar"
-                    ? "توصيل سريع خلال 24 ساعة"
-                    : "Fast Delivery Within 24 Hours"}
-                </span>
+              <div className="flex items-center gap-2 text-gray-700 font-bold">
+                <Truck size={18} className="text-teal-600 shrink-0" />
+                <span>{isRtl ? "شحن سريع حتى بابك" : "Fast Delivery"}</span>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center">
-                  <IoCheckmark className="w-5 h-5 text-primary-600" />
-                </div>
-                <span className="text-neutral-700">
-                  {language === "ar"
-                    ? "إرجاع مجاني خلال 14 يوم"
-                    : "Free Returns Within 14 Days"}
-                </span>
+              <div className="flex items-center gap-2 text-gray-700 font-bold">
+                <RotateCcw size={18} className="text-teal-600 shrink-0" />
+                <span>{isRtl ? "إرجاع مجاني وسهل" : "Easy Returns"}</span>
               </div>
             </div>
+
           </div>
+
         </div>
+
       </div>
     </div>
   );

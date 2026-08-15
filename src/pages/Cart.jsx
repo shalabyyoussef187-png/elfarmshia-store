@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "../context/LanguageContext";
@@ -7,7 +8,12 @@ import {
   Plus,
   Minus,
   ArrowRight,
-  AlertCircle,
+  ArrowLeft,
+  Truck,
+  Tag,
+  MessageSquare,
+  ShieldCheck,
+  Check,
 } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
@@ -15,14 +21,23 @@ import { useToast } from "../context/ToastContext";
 const Cart = () => {
   const { t } = useTranslation();
   const { language } = useLanguage();
+  const isRtl = language === "ar";
   const { cartItems, totalPrice, updateQuantity, removeFromCart, clearCart } =
     useCart();
   const { info, success, warning } = useToast();
 
+  const [orderNote, setOrderNote] = useState("");
+  const [couponCode, setCouponCode] = useState("");
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [shippingCountry, setShippingCountry] = useState(isRtl ? "مصر" : "Egypt");
+  const [shippingZip, setShippingZip] = useState("");
+  const [shippingCost, setShippingCost] = useState(0);
+
   const handleUpdateQuantity = (item, newQuantity) => {
     if (newQuantity < 1) return;
-    if (newQuantity > 10) {
-      warning(t("cart.maxQuantity"));
+    if (newQuantity > 20) {
+      warning(isRtl ? "الحد الأقصى للكمية هو 20 قطة" : "Maximum quantity is 20 items");
       return;
     }
     updateQuantity(item.id, newQuantity);
@@ -30,281 +45,328 @@ const Cart = () => {
 
   const handleRemoveItem = (item) => {
     removeFromCart(item.id);
-    info(`${item.name} ${t("cart.itemRemoved")}`);
+    info(`${item.name} ${isRtl ? "تمت إزالته من السلة" : "removed from cart"}`);
   };
 
   const handleClearCart = () => {
-    if (window.confirm(t("cart.clearConfirm"))) {
+    if (window.confirm(isRtl ? "هل أنت تأكد من تفريغ السلة؟" : "Are you sure you want to clear the cart?")) {
       clearCart();
-      success(t("cart.cleared"));
+      success(isRtl ? "تم تفريغ السلة بنجاح" : "Cart cleared successfully");
     }
   };
 
-  // Calculate savings
-  const totalSavings = cartItems.reduce((sum, item) => {
-    if (item.originalPrice) {
-      return sum + (item.originalPrice - item.price) * item.quantity;
+  const handleApplyCoupon = (e) => {
+    e.preventDefault();
+    if (!couponCode.trim()) return;
+    if (couponCode.toUpperCase() === "PHARMA10" || couponCode.toUpperCase() === "SAVE10") {
+      const discount = totalPrice * 0.1;
+      setDiscountAmount(discount);
+      setCouponApplied(true);
+      success(isRtl ? "تم تطبيق خصم 10% بنجاح!" : "10% discount applied!");
+    } else {
+      warning(isRtl ? "كود الخصم غير صحيح" : "Invalid coupon code");
     }
-    return sum;
-  }, 0);
+  };
+
+  const handleCalculateShipping = (e) => {
+    e.preventDefault();
+    setShippingCost(50);
+    success(isRtl ? "تم حساب تكلفة الشحن: 50 ج.م" : "Shipping rates calculated: 50 EGP");
+  };
+
+  const finalPrice = Math.max(0, totalPrice - discountAmount + shippingCost);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="bg-linear-to-b from-teal-50/50 to-white py-12 md:py-20 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3 md:gap-4 mb-6">
-            <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-teal-100 flex items-center justify-center">
-              <ShoppingBag
-                className="text-teal-600"
-                size={24}
-                strokeWidth={2}
-              />
+    <div className="min-h-screen bg-[#f8faf9] py-12" dir={isRtl ? "rtl" : "ltr"}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Page Title */}
+        <div className="flex items-center justify-between mb-8 pb-4 border-b border-emerald-900/10">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-teal-700 shadow-xs">
+              <ShoppingBag size={24} strokeWidth={2} />
             </div>
             <div>
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-gray-900">
-                {t("cart.title")}
+              <h1 className="text-2xl sm:text-4xl font-extrabold text-emerald-950 tracking-tight">
+                {isRtl ? "سلة التسوق" : "Shopping Cart"}
               </h1>
-              <p className="text-base md:text-xl text-gray-600 mt-1 md:mt-2">
-                {cartItems.length} {t("cart.items")}
+              <p className="text-xs sm:text-sm text-gray-500 font-medium">
+                {cartItems.length} {isRtl ? "منتجات في السلة" : "items in your cart"}
               </p>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Cart Content */}
-      <section className="py-8 md:py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {cartItems.length === 0 ? (
-            // Empty Cart State
-            <div className="flex flex-col items-center justify-center py-12 md:py-20">
-              <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-gray-100 flex items-center justify-center mb-6">
-                <ShoppingBag
-                  className="text-gray-400"
-                  size={40}
-                  strokeWidth={1.5}
-                />
-              </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 text-center px-4">
-                {t("cart.empty")}
-              </h2>
-              <p className="text-sm md:text-base text-gray-600 text-center max-w-md mb-8 px-4">
-                {t("cart.emptyMessage")}
-              </p>
-              <Link
-                to="/products"
-                className="flex items-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-teal-600 hover:bg-teal-700 text-white rounded-full font-semibold text-sm md:text-base transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer hover:scale-105 active:scale-95"
-              >
-                <span>{t("cart.startShopping")}</span>
-                <ArrowRight size={20} strokeWidth={2.5} />
-              </Link>
-            </div>
-          ) : (
-            // Cart Items
-            <div className="grid lg:grid-cols-3 gap-8">
-              {/* Items List */}
-              <div className="lg:col-span-2 space-y-4">
-                {/* Clear Cart Button */}
-                <div className="flex justify-end mb-4">
-                  <button
-                    onClick={handleClearCart}
-                    className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300 cursor-pointer active:scale-95"
-                  >
-                    <Trash2 size={16} />
-                    <span className="text-sm font-medium">
-                      {t("cart.clearCart")}
-                    </span>
-                  </button>
-                </div>
-
-                {/* Cart Items */}
-                {cartItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="bg-white rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-300"
-                  >
-                    <div className="flex flex-col sm:flex-row gap-4 md:gap-6">
-                      {/* Product Image */}
-                      <div className="shrink-0 mx-auto sm:mx-0">
-                        <div className="w-32 h-32 sm:w-24 sm:h-24 rounded-xl bg-gray-100 overflow-hidden">
-                          <img
-                            src={
-                              item.image ||
-                              "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop"
-                            }
-                            alt={item.name}
-                            className="w-full h-full object-contain p-2"
-                            onError={(e) => {
-                              e.target.src =
-                                "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop";
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Product Details */}
-                      <div className="flex-1 min-w-0 text-center sm:text-left">
-                        <h3 className="text-base md:text-lg font-bold text-gray-900 mb-1 line-clamp-2">
-                          {item.name}
-                        </h3>
-                        {item.category && (
-                          <p className="text-xs md:text-sm text-gray-500 mb-1">
-                            {item.category}
-                          </p>
-                        )}
-                        {item.brand && (
-                          <p className="text-xs md:text-sm text-gray-500">
-                            <span className="font-medium">Brand:</span>{" "}
-                            {item.brand}
-                          </p>
-                        )}
-
-                        {/* Price & Discount */}
-                        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 md:gap-3 mt-3">
-                          <span className="text-xl md:text-2xl font-bold text-teal-600">
-                            EGP {item.price.toFixed(2)}
-                          </span>
-                          {item.originalPrice && (
-                            <>
-                              <span className="text-xs md:text-sm text-gray-400 line-through">
-                                EGP {item.originalPrice.toFixed(2)}
-                              </span>
-                              <span className="px-2 py-0.5 bg-red-100 text-red-600 text-xs font-bold rounded-full">
-                                -{item.discount}%
-                              </span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Quantity Controls & Remove */}
-                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-between w-full sm:w-auto gap-3 sm:gap-0">
-                        <div className="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-2">
-                          {/* Quantity Controls */}
-                          <div className="flex items-center gap-2 bg-gray-100 rounded-xl p-1">
-                            <button
-                              onClick={() =>
-                                handleUpdateQuantity(item, item.quantity - 1)
-                              }
-                              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white transition-all duration-300"
-                              disabled={item.quantity <= 1}
-                            >
-                              <Minus
-                                size={16}
-                                className={
-                                  item.quantity <= 1
-                                    ? "text-gray-300"
-                                    : "text-gray-700"
-                                }
-                              />
-                            </button>
-                            <span className="w-10 text-center font-bold text-gray-900">
-                              {item.quantity}
-                            </span>
-                            <button
-                              onClick={() =>
-                                handleUpdateQuantity(item, item.quantity + 1)
-                              }
-                              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white transition-all duration-300"
-                            >
-                              <Plus size={16} className="text-gray-700" />
-                            </button>
-                          </div>
-
-                          {/* Subtotal */}
-                          <div className="text-right">
-                            <p className="text-xs text-gray-500 mb-1">
-                              {t("cart.subtotal")}
-                            </p>
-                            <p className="text-lg md:text-xl font-bold text-gray-900">
-                              EGP {(item.price * item.quantity).toFixed(2)}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Remove Button */}
-                        <button
-                          onClick={() => handleRemoveItem(item)}
-                          className="flex items-center gap-1 text-red-600 hover:text-red-700 transition-colors"
-                        >
-                          <Trash2 size={16} />
-                          <span className="text-sm font-medium">
-                            {t("cart.remove")}
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Order Summary Sidebar */}
-              <div className="lg:col-span-1">
-                <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm lg:sticky lg:top-32">
-                  <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-6">
-                    {t("checkout.orderSummary")}
-                  </h2>
-
-                  <div className="space-y-4 mb-6 pb-6 border-b border-gray-200">
-                    <div className="flex justify-between text-sm md:text-base text-gray-600">
-                      <span>{t("cart.subtotal")}</span>
-                      <span className="font-semibold">
-                        EGP {totalPrice.toFixed(2)}
-                      </span>
-                    </div>
-
-                    {totalSavings > 0 && (
-                      <div className="flex justify-between text-sm md:text-base text-green-600">
-                        <span>{t("cart.savings")}</span>
-                        <span className="font-bold">
-                          -EGP {totalSavings.toFixed(2)}
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-xl">
-                      <AlertCircle
-                        size={16}
-                        className="text-blue-600 shrink-0 mt-0.5"
-                      />
-                      <p className="text-xs text-blue-900">
-                        {language === "ar"
-                          ? "الشحن والخصومات سيتم حسابها عند الدفع"
-                          : "Shipping and additional discounts calculated at checkout"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center mb-6 pb-6 border-b border-gray-200">
-                    <span className="text-lg md:text-xl font-bold text-gray-900">
-                      {t("cart.total")}
-                    </span>
-                    <span className="text-2xl md:text-3xl font-bold text-teal-600">
-                      EGP {totalPrice.toFixed(2)}
-                    </span>
-                  </div>
-
-                  <Link
-                    to="/checkout"
-                    className="w-full flex items-center justify-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-teal-600 hover:bg-teal-700 text-white rounded-full font-bold text-base md:text-lg transition-all duration-300 shadow-lg hover:shadow-xl mb-4 cursor-pointer hover:scale-[1.02] active:scale-95"
-                  >
-                    <span>{t("cart.checkout")}</span>
-                    <ArrowRight size={20} strokeWidth={2.5} />
-                  </Link>
-
-                  <Link
-                    to="/products"
-                    className="w-full flex items-center justify-center gap-2 px-6 md:px-8 py-2.5 md:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full font-semibold text-sm md:text-base transition-all duration-300 cursor-pointer active:scale-95"
-                  >
-                    <span>{t("cart.continueShopping")}</span>
-                  </Link>
-                </div>
-              </div>
-            </div>
+          {cartItems.length > 0 && (
+            <button
+              onClick={handleClearCart}
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all cursor-pointer"
+            >
+              <Trash2 size={15} />
+              <span>{isRtl ? "تفريغ السلة" : "Clear Cart"}</span>
+            </button>
           )}
         </div>
-      </section>
+
+        {cartItems.length === 0 ? (
+          /* Empty Cart State */
+          <div className="bg-white rounded-3xl p-12 text-center border border-gray-100 shadow-xs max-w-xl mx-auto my-12">
+            <div className="w-20 h-20 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center mx-auto mb-6 text-teal-600">
+              <ShoppingBag size={38} strokeWidth={1.5} />
+            </div>
+            <h2 className="text-2xl font-black text-emerald-950 mb-2">
+              {isRtl ? "سلة التسوق فارغة" : "Your cart is empty"}
+            </h2>
+            <p className="text-sm text-gray-500 mb-8 leading-relaxed">
+              {isRtl
+                ? "يبدو أنك لم تضف أي منتجات إلى سلة التسوق بعد. تصفح منتجاتنا واكتشف عروضنا المتميزة!"
+                : "Explore our wide range of products and find something you love!"}
+            </p>
+            <Link
+              to="/products"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-teal-600 hover:bg-teal-700 text-white font-extrabold rounded-full shadow-lg shadow-teal-600/20 hover:scale-105 transition-all"
+            >
+              <span>{isRtl ? "ابدأ التسوق الآن" : "Start Shopping Now"}</span>
+              {isRtl ? <ArrowLeft size={18} strokeWidth={2.5} /> : <ArrowRight size={18} strokeWidth={2.5} />}
+            </Link>
+          </div>
+        ) : (
+          /* Active Cart Grid matching Dr Vitamin Inspiration */
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            {/* Left Column: Cart Items Table + Order Note (8 Cols) */}
+            <div className="lg:col-span-8 space-y-6">
+              
+              {/* Items Table Container */}
+              <div className="bg-white rounded-3xl border border-gray-100 shadow-xs overflow-hidden">
+                {/* Table Header */}
+                <div className="grid grid-cols-12 gap-4 p-4 bg-slate-50 border-b border-gray-100 text-xs font-black text-gray-500 uppercase tracking-wider">
+                  <div className="col-span-6">{isRtl ? "المنتج" : "Product"}</div>
+                  <div className="col-span-3 text-center">{isRtl ? "الكمية" : "Quantity"}</div>
+                  <div className="col-span-3 text-left rtl:text-right">{isRtl ? "المجموع الفرعي" : "Subtotal"}</div>
+                </div>
+
+                {/* Table Body Items */}
+                <div className="divide-y divide-gray-100">
+                  {cartItems.map((item) => (
+                    <div key={item.id} className="grid grid-cols-12 gap-4 p-5 items-center hover:bg-slate-50/50 transition-colors">
+                      
+                      {/* Product details (6 Cols) */}
+                      <div className="col-span-6 flex items-center gap-4">
+                        <button
+                          onClick={() => handleRemoveItem(item)}
+                          className="text-gray-400 hover:text-red-600 transition-colors p-1.5 rounded-lg hover:bg-red-50 cursor-pointer"
+                          title={isRtl ? "حذف" : "Remove"}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+
+                        <div className="w-16 h-16 rounded-xl bg-slate-50 border border-gray-100 p-2 shrink-0 overflow-hidden flex items-center justify-center">
+                          <img
+                            src={item.image || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop"}
+                            alt={item.name}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+
+                        <div>
+                          <h3 className="text-sm font-extrabold text-gray-900 leading-snug line-clamp-2">
+                            {item.name}
+                          </h3>
+                          <p className="text-xs text-teal-700 font-bold mt-1">
+                            {item.price.toFixed(0)} {isRtl ? "ج.م" : "EGP"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Stepper Quantity (3 Cols) */}
+                      <div className="col-span-3 flex justify-center">
+                        <div className="flex items-center bg-slate-100 border border-slate-200/80 rounded-xl p-1 shadow-xs">
+                          <button
+                            onClick={() => handleUpdateQuantity(item, item.quantity - 1)}
+                            disabled={item.quantity <= 1}
+                            className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-700 font-bold hover:bg-gray-50 disabled:opacity-40 transition-all cursor-pointer"
+                          >
+                            <Minus size={13} strokeWidth={2.5} />
+                          </button>
+                          
+                          <span className="w-9 text-center font-extrabold text-sm text-gray-900">
+                            {item.quantity}
+                          </span>
+
+                          <button
+                            onClick={() => handleUpdateQuantity(item, item.quantity + 1)}
+                            className="w-7 h-7 rounded-lg bg-teal-600 text-white flex items-center justify-center font-bold hover:bg-teal-700 transition-all cursor-pointer shadow-xs"
+                          >
+                            <Plus size={13} strokeWidth={2.5} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Subtotal (3 Cols) */}
+                      <div className="col-span-3 text-left rtl:text-right">
+                        <span className="text-base font-black text-emerald-950">
+                          {(item.price * item.quantity).toFixed(0)} {isRtl ? "ج.م" : "EGP"}
+                        </span>
+                      </div>
+
+                    </div>
+                  ))}
+                </div>
+
+                {/* Continue Shopping CTA inside left box */}
+                <div className="p-4 bg-slate-50/70 border-t border-gray-100 flex items-center justify-between">
+                  <Link
+                    to="/products"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all"
+                  >
+                    <span>{isRtl ? "متابعة التسوق" : "Continue Shopping"}</span>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Order Note Box ("أضافة ملاحظة الطلب") */}
+              <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-xs">
+                <div className="flex items-center gap-2 mb-3">
+                  <MessageSquare size={18} className="text-teal-600" />
+                  <h3 className="text-sm font-extrabold text-emerald-950">
+                    {isRtl ? "أضافة ملاحظة الطلب" : "Add Order Note"}
+                  </h3>
+                </div>
+                <textarea
+                  rows={3}
+                  value={orderNote}
+                  onChange={(e) => setOrderNote(e.target.value)}
+                  placeholder={isRtl ? "كيف يمكننا مساعدتك؟ اكتب أي تعليمات خاصة بتسليم طلبك..." : "How can we help you? Write any delivery instructions..."}
+                  className="w-full p-4 text-xs text-gray-800 bg-slate-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 transition-all placeholder-gray-400 resize-none font-medium"
+                />
+              </div>
+
+            </div>
+
+            {/* Right Column: Order Summary Sidebar (4 Cols) */}
+            <div className="lg:col-span-4 space-y-6">
+              
+              <div className="bg-white rounded-3xl p-6 sm:p-7 border border-gray-100 shadow-md sticky top-28">
+                
+                <h2 className="text-lg font-black text-emerald-950 mb-6 pb-3 border-b border-gray-100">
+                  {isRtl ? "إجمالي سلة التسوق" : "Cart Totals"}
+                </h2>
+
+                {/* Subtotal */}
+                <div className="flex justify-between items-center text-sm font-bold text-gray-600 mb-4">
+                  <span>{isRtl ? "المجموع الفرعي:" : "Subtotal:"}</span>
+                  <span className="text-base font-black text-emerald-950">
+                    {totalPrice.toFixed(0)} {isRtl ? "ج.م" : "EGP"}
+                  </span>
+                </div>
+
+                {/* Estimate Shipping Accordion / Box */}
+                <div className="mb-6 p-4 rounded-2xl bg-slate-50 border border-gray-100">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Truck size={16} className="text-teal-600" />
+                    <span className="text-xs font-extrabold text-gray-800">
+                      {isRtl ? "تقدير أسعار الشحن:" : "Estimate Shipping Rates:"}
+                    </span>
+                  </div>
+
+                  <form onSubmit={handleCalculateShipping} className="space-y-2">
+                    <input
+                      type="text"
+                      value={shippingCountry}
+                      onChange={(e) => setShippingCountry(e.target.value)}
+                      placeholder={isRtl ? "الدولة" : "Country"}
+                      className="w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-xl outline-none focus:border-teal-400"
+                    />
+                    <input
+                      type="text"
+                      value={shippingZip}
+                      onChange={(e) => setShippingZip(e.target.value)}
+                      placeholder={isRtl ? "الرمز البريدي / المدينة" : "City / Zip Code"}
+                      className="w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-xl outline-none focus:border-teal-400"
+                    />
+                    <button
+                      type="submit"
+                      className="w-full py-2 bg-emerald-800 hover:bg-emerald-900 text-white font-extrabold text-[11px] uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                    >
+                      {isRtl ? "حساب تكلفة الشحن" : "Calculate Shipping Rates"}
+                    </button>
+                  </form>
+                </div>
+
+                {/* Coupon Code Section */}
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Tag size={15} className="text-teal-600" />
+                    <span className="text-xs font-extrabold text-gray-800">
+                      {isRtl ? "قسيمة الخصم:" : "Coupon Code:"}
+                    </span>
+                  </div>
+
+                  <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value)}
+                      placeholder={isRtl ? "رمز القسيمة" : "Coupon code"}
+                      disabled={couponApplied}
+                      className="flex-1 px-3.5 py-2 text-xs bg-slate-50 border border-gray-200 rounded-xl outline-none focus:border-teal-400 uppercase font-bold"
+                    />
+                    <button
+                      type="submit"
+                      disabled={couponApplied}
+                      className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer disabled:bg-emerald-600"
+                    >
+                      {couponApplied ? <Check size={16} /> : (isRtl ? "تطبيق" : "Apply")}
+                    </button>
+                  </form>
+                </div>
+
+                {/* Discounts Display */}
+                {discountAmount > 0 && (
+                  <div className="flex justify-between items-center text-xs font-bold text-emerald-600 mb-4 bg-emerald-50 p-2.5 rounded-xl border border-emerald-100">
+                    <span>{isRtl ? "خصم القسيمة (10%):" : "Coupon Discount (10%):"}</span>
+                    <span>-{discountAmount.toFixed(0)} {isRtl ? "ج.م" : "EGP"}</span>
+                  </div>
+                )}
+
+                {/* Final Total */}
+                <div className="flex justify-between items-baseline pt-4 mb-6 border-t border-gray-100">
+                  <span className="text-base font-black text-gray-900">
+                    {isRtl ? "إجمالي الطلبات:" : "Total Orders:"}
+                  </span>
+                  <div className="text-right">
+                    <span className="text-2xl font-black text-teal-700">
+                      {finalPrice.toFixed(0)} {isRtl ? "ج.م" : "EGP"}
+                    </span>
+                    <p className="text-[10px] text-gray-400">
+                      {isRtl ? "يتم احتساب الضرائب والشحن عند الدفع" : "Taxes & shipping calculated at checkout"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Checkout CTA */}
+                <Link
+                  to="/checkout"
+                  className="w-full py-4 bg-teal-600 hover:bg-teal-700 text-white font-black text-sm uppercase tracking-wider rounded-2xl shadow-lg shadow-teal-600/20 hover:shadow-xl hover:shadow-teal-600/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>{isRtl ? "إتمام الشراء الآن" : "Proceed to Checkout"}</span>
+                  {isRtl ? <ArrowLeft size={18} strokeWidth={2.5} /> : <ArrowRight size={18} strokeWidth={2.5} />}
+                </Link>
+
+                {/* Trust Guarantee Badge */}
+                <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-center gap-2 text-gray-400 text-xs font-medium">
+                  <ShieldCheck size={16} className="text-teal-600" />
+                  <span>{isRtl ? "دفع آمن ومحمي 100%" : "100% Secure Checkout"}</span>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+        )}
+
+      </div>
     </div>
   );
 };
