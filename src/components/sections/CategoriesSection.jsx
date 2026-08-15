@@ -1,9 +1,9 @@
 import CategoryCard from "../common/CategoryCard";
-import iconVitB from "C:/Users/Elmasry-pc/.gemini/antigravity-ide/brain/80c5e37b-cedb-46b5-b00f-cee361c4750d/icon_vit_b_1786807330507.png";
-import iconHairVit from "C:/Users/Elmasry-pc/.gemini/antigravity-ide/brain/80c5e37b-cedb-46b5-b00f-cee361c4750d/icon_hair_vit_1786807346404.png";
-import iconVitC from "C:/Users/Elmasry-pc/.gemini/antigravity-ide/brain/80c5e37b-cedb-46b5-b00f-cee361c4750d/icon_vit_c_1786807363443.png";
-import iconMultiVit from "C:/Users/Elmasry-pc/.gemini/antigravity-ide/brain/80c5e37b-cedb-46b5-b00f-cee361c4750d/icon_multi_vit_1786807380692.png";
-import iconGeneralVit from "C:/Users/Elmasry-pc/.gemini/antigravity-ide/brain/80c5e37b-cedb-46b5-b00f-cee361c4750d/icon_general_vit_1786807395527.png";
+import iconVitB from "../../assets/icon_vit_b.png";
+import iconHairVit from "../../assets/icon_hair_vit.png";
+import iconVitC from "../../assets/icon_vit_c.png";
+import iconMultiVit from "../../assets/icon_multi_vit.png";
+import iconGeneralVit from "../../assets/icon_general_vit.png";
 import { Leaf } from "lucide-react";
 
 // Categories with premium green vector icons matching the reference screenshot:
