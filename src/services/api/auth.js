@@ -1,4 +1,4 @@
-export const API_BASE = "https://pharma-api-flame.vercel.app";
+export const API_BASE = "https://elfarmshia-backend.vercel.app";
 
 const STORAGE_TOKEN = "pharma_auth_token";
 const STORAGE_USER = "pharma_auth_user";
