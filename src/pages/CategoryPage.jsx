@@ -1,264 +1,327 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
-import { ChevronDown, SlidersHorizontal } from "lucide-react";
+import { useParams, Link } from "react-router-dom";
+import { useLanguage } from "../context/LanguageContext";
 import ProductCard from "../components/common/ProductCard";
+import { products as ALL_PRODUCTS } from "../data/products";
+import { SlidersHorizontal, ArrowLeft, ArrowRight, ShieldCheck, Sparkles, Filter } from "lucide-react";
 
+/**
+ * CategoryPage — Comprehensive category viewer mapping all category slugs,
+ * displaying real products from products data, with full Arabic & English i18n.
+ */
 const CategoryPage = () => {
   const { slug } = useParams();
+  const { language } = useLanguage();
+  const isRtl = language === "ar";
 
-  // Sample products - would come from API in production
-  const products = [
-    {
-      id: 1,
-      name: "Panadol Extra",
-      price: 45.0,
-      originalPrice: 55.0,
-      discount: 18,
-      image:
-        "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop",
-      rating: 4.8,
-    },
-    {
-      id: 2,
-      name: "Premium Product",
-      price: 35.0,
-      image:
-        "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&h=400&fit=crop",
-      rating: 4.6,
-    },
-    {
-      id: 3,
-      name: "Healthcare Essential",
-      price: 28.0,
-      originalPrice: 35.0,
-      discount: 20,
-      image:
-        "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&h=400&fit=crop",
-      rating: 4.7,
-    },
-    {
-      id: 4,
-      name: "Wellness Product",
-      price: 32.0,
-      image:
-        "https://images.unsplash.com/photo-1550572017-4814c5c3a5e4?w=400&h=400&fit=crop",
-      rating: 4.5,
-    },
-    {
-      id: 5,
-      name: "Health Care Item",
-      price: 24.0,
-      originalPrice: 30.0,
-      discount: 20,
-      image:
-        "https://images.unsplash.com/photo-1585435557343-3b092031a831?w=400&h=400&fit=crop",
-      rating: 4.9,
-    },
-    {
-      id: 6,
-      name: "Medical Supply",
-      price: 120.0,
-      image:
-        "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=400&h=400&fit=crop",
-      rating: 4.8,
-    },
-    {
-      id: 7,
-      name: "Care Solution",
-      price: 85.0,
-      originalPrice: 95.0,
-      discount: 11,
-      image:
-        "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&h=400&fit=crop",
-      rating: 4.7,
-    },
-    {
-      id: 8,
-      name: "Treatment Option",
-      price: 42.0,
-      image:
-        "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop",
-      rating: 4.6,
-    },
-  ];
+  const [selectedSubcat, setSelectedSubcat] = useState("all");
+  const [sortBy, setSortBy] = useState("popular");
 
-  const categoryInfo = {
-    medicine: {
-      title: "Medicine & Treatments",
-      description:
-        "Discover a wide range of authentic medications for various health conditions",
+  // Comprehensive Category Meta Mapping for ALL slugs
+  const CATEGORY_MAP = {
+    "vitamin-b": {
+      title: "Vitamin B Complex",
+      titleAr: "فيتامين ب المركب",
+      description: "Essential B-complex vitamins for nerve health, energy, and metabolism boost.",
+      descriptionAr: "مجموعة فيتامينات ب المركبة لدعم صحة الأعصاب والنشاط اليومي وتعزيز الطاقة.",
+      mainCategory: "vitamins-supplements",
       subcategories: [
-        "Pain Relief",
-        "Cold & Flu",
-        "Digestive Health",
-        "Antibiotics",
-        "All Medicine",
+        { id: "all", nameEn: "All B-Vitamins", nameAr: "جميع فيتامينات ب" },
+        { id: "b12", nameEn: "Vitamin B12", nameAr: "فيتامين ب12" },
+        { id: "complex", nameEn: "B-Complex", nameAr: "مركب فيتامين ب" },
       ],
     },
-    "skin-care": {
-      title: "Skin Care Products",
-      description: "Premium skincare solutions for healthy, radiant skin",
+    "hair-vitamins": {
+      title: "Hair & Nails Vitamins",
+      titleAr: "فيتامينات الشعر والأظافر",
+      description: "Specialized formulas with Biotin, Zinc, and Collagen for thick, radiant hair.",
+      descriptionAr: "تركيبات مخصصة تحتوي على البيوتين والزنك والكولاجين لتعزيز كثافة الشعر وصحة الأظافر.",
+      mainCategory: "vitamins-supplements",
       subcategories: [
-        "Moisturizers",
-        "Cleansers",
-        "Sunscreen",
-        "Anti-Aging",
-        "All Skincare",
+        { id: "all", nameEn: "All Hair Care", nameAr: "جميع عناية الشعر" },
+        { id: "biotin", nameEn: "Biotin", nameAr: "البيوتين" },
+        { id: "collagen", nameEn: "Collagen", nameAr: "الكولاجين" },
+      ],
+    },
+    "vitamin-c": {
+      title: "Vitamin C & Immunity",
+      titleAr: "فيتامين سي والمناعة",
+      description: "Potent antioxidant vitamin C supplements for immune support and glowing skin.",
+      descriptionAr: "مكملات فيتامين سي المضادة للأكسدة لدعم الجهاز المناعي ونضارة البشرة.",
+      mainCategory: "vitamins-supplements",
+      subcategories: [
+        { id: "all", nameEn: "All Immunity", nameAr: "جميع المناعة" },
+        { id: "effervescent", nameEn: "Effervescent", nameAr: "فوار" },
+        { id: "capsules", nameEn: "Capsules", nameAr: "كبسولات" },
+      ],
+    },
+    multivitamins: {
+      title: "Daily Multivitamins",
+      titleAr: "الفيتامينات المتعددة",
+      description: "Complete daily multivitamin formulas tailored for men, women, and seniors.",
+      descriptionAr: "تركيبات فيتامين متعدد يومية كاملة مصممة خصيصاً للرجال والنساء وكبار السن.",
+      mainCategory: "vitamins-supplements",
+      subcategories: [
+        { id: "all", nameEn: "All Multivitamins", nameAr: "جميع الفيتامينات المتعددة" },
+        { id: "adults", nameEn: "Adult Daily", nameAr: "للبالغين" },
       ],
     },
     vitamins: {
       title: "Vitamins & Supplements",
-      description:
-        "Essential vitamins and dietary supplements for optimal health",
+      titleAr: "الفيتامينات والمكملات",
+      description: "Comprehensive daily nutrition, minerals, and dietary health supplements.",
+      descriptionAr: "تغذية يومية شاملة وفيتامينات أساسية ومكملات غذائية لدعم الصحة العامة.",
+      mainCategory: "vitamins-supplements",
       subcategories: [
-        "Multivitamins",
-        "Vitamin D",
-        "Omega-3",
-        "Immunity Support",
-        "All Vitamins",
+        { id: "all", nameEn: "All Vitamins", nameAr: "جميع الفيتامينات" },
+        { id: "multivitamins", nameEn: "Multivitamins", nameAr: "فيتامينات متعددة" },
+        { id: "vitamin-d", nameEn: "Vitamin D", nameAr: "فيتامين د" },
+        { id: "omega", nameEn: "Omega-3", nameAr: "أوميجا-3" },
+      ],
+    },
+    supplements: {
+      title: "Dietary Supplements",
+      titleAr: "المكملات الغذائية",
+      description: "Science-backed nutritional formulas for stamina, recovery, and wellness.",
+      descriptionAr: "مكملات غذائية مدعومة علمياً لتعزيز النشاط والحيوية واللياقة البدنية.",
+      mainCategory: "vitamins-supplements",
+      subcategories: [
+        { id: "all", nameEn: "All Supplements", nameAr: "جميع المكملات" },
+        { id: "protein", nameEn: "Proteins", nameAr: "بروتينات" },
+        { id: "minerals", nameEn: "Minerals", nameAr: "معادن" },
+      ],
+    },
+    "skin-care": {
+      title: "Skin Care & Beauty",
+      titleAr: "العناية بالبشرة والجمال",
+      description: "Expert dermatological solutions, cleansers, serums, and hydrating creams.",
+      descriptionAr: "حلول طبية متخصصة للعناية بالبشرة، المنظفات، السيروم، وكريمات الترطيب الفائقة.",
+      mainCategory: "skin-care",
+      subcategories: [
+        { id: "all", nameEn: "All Skincare", nameAr: "جميع العناية بالبشرة" },
+        { id: "cleanser", nameEn: "Cleansers", nameAr: "الغسول والمنظفات" },
+        { id: "serum", nameEn: "Serums", nameAr: "السيروم" },
+        { id: "moisturizer", nameEn: "Moisturizers", nameAr: "المرطبات" },
+      ],
+    },
+    "hair-care": {
+      title: "Hair Care Solutions",
+      titleAr: "العناية بالشعر",
+      description: "Therapeutic shampoos, scalp conditioners, and anti-dandruff treatments.",
+      descriptionAr: "شامبوهات علاجية، بلسم لفروة الرأس، وعلاجات مضادة للقشرة والتساقط.",
+      mainCategory: "hair-care",
+      subcategories: [
+        { id: "all", nameEn: "All Hair Care", nameAr: "جميع العناية بالشعر" },
+        { id: "shampoo", nameEn: "Shampoos", nameAr: "الشامبو" },
       ],
     },
     "mom-baby": {
       title: "Mom & Baby Care",
-      description: "Premium care products for mothers and babies",
+      titleAr: "الأم والطفل",
+      description: "Safe, pediatrician-trusted care products for mothers and newborns.",
+      descriptionAr: "منتجات رعاية آمنة وموثوقة من أطباء الأطفال للأمهات والمواليد الجدد.",
+      mainCategory: "mom-baby",
       subcategories: [
-        "Baby Food",
-        "Diapers",
-        "Baby Care",
-        "Maternity",
-        "All Products",
+        { id: "all", nameEn: "All Baby Products", nameAr: "جميع منتجات الأطفال" },
+        { id: "lotion", nameEn: "Baby Lotions", nameAr: "لوشن وزيوت" },
+      ],
+    },
+    medicine: {
+      title: "Medications & Healthcare",
+      titleAr: "الأدوية والحلول العلاجية",
+      description: "Certified pain relievers, cold treatments, and daily prescriptions.",
+      descriptionAr: "مسكنات معتمدة، علاجات البرد، والأدوية اليومية من صيدليات مرخصة.",
+      mainCategory: "medicine",
+      subcategories: [
+        { id: "all", nameEn: "All Medications", nameAr: "جميع الأدوية" },
+      ],
+    },
+    "medical-equipment": {
+      title: "Medical Equipment",
+      titleAr: "الأجهزة الطبية",
+      description: "Digital blood pressure monitors, thermometers, and clinical devices.",
+      descriptionAr: "أجهزة قياس ضغط الدم الرقمية، الترمومترات، والمستلزمات الطبية المنزلية.",
+      mainCategory: "medical-equipment",
+      subcategories: [
+        { id: "all", nameEn: "All Equipment", nameAr: "جميع الأجهزة" },
+      ],
+    },
+    cosmetics: {
+      title: "Cosmetics & Beauty",
+      titleAr: "مستحضرات التجميل",
+      description: "Anti-aging creams, hydration gels, and premium dermatological cosmetics.",
+      descriptionAr: "كريمات مقاومة الشيخوخة، جل الترطيب، ومستحضرات التجميل الطبية.",
+      mainCategory: "cosmetics",
+      subcategories: [
+        { id: "all", nameEn: "All Cosmetics", nameAr: "جميع التجميل" },
       ],
     },
   };
 
-  const info = categoryInfo[slug] || categoryInfo.medicine;
+  // Get matching category details or fallback smoothly
+  const currentCategory = CATEGORY_MAP[slug] || {
+    title: isRtl ? "المنتجات الطبية والصحية" : "Medical & Health Products",
+    titleAr: "المنتجات الطبية والصحية",
+    description: isRtl
+      ? "تصفح أحدث الأدوية والمكملات ومستحضرات التجميل المعتمدة"
+      : "Browse certified medications, vitamins, and healthcare essentials",
+    mainCategory: slug,
+    subcategories: [{ id: "all", nameEn: "All Products", nameAr: "جميع المنتجات" }],
+  };
+
+  const pageTitle = isRtl ? currentCategory.titleAr : currentCategory.title;
+  const pageDesc = isRtl ? currentCategory.descriptionAr : currentCategory.description;
+
+  // Filter actual products matching this category slug or main category
+  const filteredCategoryProducts = ALL_PRODUCTS.filter((product) => {
+    if (!slug) return true;
+    if (product.category === slug) return true;
+    if (currentCategory.mainCategory && product.category === currentCategory.mainCategory) return true;
+    // Fallback search match by category slug keywords
+    if (slug.includes("vitam") || slug.includes("supple")) {
+      return product.category === "vitamins-supplements" || product.category === "vitamins";
+    }
+    return true;
+  });
+
+  // Sort logic
+  const sortedProducts = [...filteredCategoryProducts].sort((a, b) => {
+    if (sortBy === "price-low") return a.price - b.price;
+    if (sortBy === "price-high") return b.price - a.price;
+    if (sortBy === "rating") return (b.rating || 0) - (a.rating || 0);
+    return (b.reviews || 0) - (a.reviews || 0); // popular
+  });
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="bg-linear-to-b from-teal-50/50 to-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-            {info.title}
-          </h1>
-          <p className="text-xl text-gray-600 leading-relaxed max-w-3xl">
-            {info.description}
-          </p>
+    <div className="min-h-screen bg-[#f8faf9] py-8 sm:py-12" dir={isRtl ? "rtl" : "ltr"}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Breadcrumb Navigation */}
+        <div className="mb-6 flex items-center gap-2 text-xs font-bold text-gray-500">
+          <Link to="/" className="hover:text-teal-700">{isRtl ? "الرئيسية" : "Home"}</Link>
+          <span>/</span>
+          <Link to="/products" className="hover:text-teal-700">{isRtl ? "التصنيفات" : "Categories"}</Link>
+          <span>/</span>
+          <span className="text-teal-700 font-extrabold">{pageTitle}</span>
         </div>
-      </section>
 
-      {/* Subcategories & Filters */}
-      <section className="border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          {/* Subcategories */}
-          <div className="flex flex-wrap gap-3 mb-6">
-            {info.subcategories.map((subcat, index) => (
-              <button
-                key={index}
-                className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 ${
-                  index === info.subcategories.length - 1
-                    ? "bg-teal-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {subcat}
-              </button>
-            ))}
-          </div>
+        {/* Category Header Hero */}
+        <div className="relative rounded-3xl p-6 sm:p-10 mb-8 bg-gradient-to-r from-emerald-950 via-teal-900 to-teal-950 text-white overflow-hidden shadow-lg border border-teal-700/40">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-teal-400/10 rounded-full blur-3xl pointer-events-none" />
 
-          {/* Filters Bar */}
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2 text-gray-600">
-              <SlidersHorizontal size={20} />
-              <span className="font-semibold">Filters:</span>
+          <div className="relative z-10 space-y-3 max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-teal-200 text-xs font-black uppercase">
+              <Sparkles size={14} className="text-amber-400" />
+              <span>{isRtl ? "قسم معتمد من الصيدلية" : "Certified Category"}</span>
             </div>
 
-            {/* Price Range */}
-            <div className="relative">
-              <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:border-teal-300 transition-colors">
-                <span className="text-gray-700">Price Range</span>
-                <ChevronDown size={18} />
-              </button>
-            </div>
+            <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+              {pageTitle}
+            </h1>
 
-            {/* Brand */}
-            <div className="relative">
-              <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:border-teal-300 transition-colors">
-                <span className="text-gray-700">Brand</span>
-                <ChevronDown size={18} />
-              </button>
-            </div>
-
-            {/* Sort */}
-            <div className="relative ml-auto">
-              <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:border-teal-300 transition-colors">
-                <span className="text-gray-700">Sort by: Popular</span>
-                <ChevronDown size={18} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Products Grid */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <p className="text-gray-600">
-              Showing{" "}
-              <span className="font-semibold text-gray-900">
-                {products.length}
-              </span>{" "}
-              products
+            <p className="text-xs sm:text-sm text-teal-100/90 font-light leading-relaxed">
+              {pageDesc}
             </p>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map((product) => (
-              <ProductCard key={product.id} {...product} />
+        {/* Subcategories & Sort Toolbar */}
+        <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-xs mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          
+          {/* Subcategories Filter Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+            {currentCategory.subcategories.map((subcat) => (
+              <button
+                key={subcat.id}
+                onClick={() => setSelectedSubcat(subcat.id)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                  selectedSubcat === subcat.id
+                    ? "bg-teal-600 text-white shadow-md shadow-teal-600/20"
+                    : "bg-slate-100 text-gray-700 hover:bg-slate-200/80"
+                }`}
+              >
+                {isRtl ? subcat.nameAr : subcat.nameEn}
+              </button>
             ))}
           </div>
 
-          {/* Load More */}
-          <div className="mt-12 text-center">
-            <button className="px-8 py-4 bg-gray-100 hover:bg-teal-600 hover:text-white text-gray-900 rounded-full font-semibold transition-all duration-300 cursor-pointer hover:scale-105 active:scale-95">
-              Load More Products
-            </button>
+          {/* Sorting Dropdown */}
+          <div className="flex items-center gap-2 justify-end">
+            <span className="text-xs font-extrabold text-gray-500 shrink-0">
+              {isRtl ? "ترتيب حسب:" : "Sort by:"}
+            </span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="bg-slate-50 text-xs font-bold text-gray-800 px-3 py-2 rounded-xl outline-none border border-gray-200 focus:border-teal-400 cursor-pointer"
+            >
+              <option value="popular">{isRtl ? "الأكثر شعبية" : "Most Popular"}</option>
+              <option value="price-low">{isRtl ? "السعر: من الأقل للأعلى" : "Price: Low to High"}</option>
+              <option value="price-high">{isRtl ? "السعر: من الأعلى للأقل" : "Price: High to Low"}</option>
+              <option value="rating">{isRtl ? "الأعلى تقييماً" : "Top Rated"}</option>
+            </select>
           </div>
-        </div>
-      </section>
 
-      {/* Category Benefits */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                100% Authentic
-              </h3>
-              <p className="text-gray-600">
-                All products sourced from licensed pharmacies
-              </p>
+        </div>
+
+        {/* Products Grid */}
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-xs text-gray-500 font-bold">
+            {isRtl ? "عرض" : "Showing"}{" "}
+            <span className="font-black text-teal-700">{sortedProducts.length}</span>{" "}
+            {isRtl ? "منتج متاح" : "available products"}
+          </p>
+        </div>
+
+        {sortedProducts.length === 0 ? (
+          <div className="bg-white rounded-3xl p-12 text-center border border-gray-100 my-8">
+            <h3 className="text-lg font-black text-emerald-950 mb-2">
+              {isRtl ? "لا توجد منتجات متوفرة حالياً في هذا القسم" : "No products available in this category currently"}
+            </h3>
+            <p className="text-xs text-gray-500 mb-6">
+              {isRtl ? "تصفح جميع المنتجات المتاحة في صيدليتنا" : "Browse all available products in our store"}
+            </p>
+            <Link
+              to="/products"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-teal-600 text-white font-extrabold text-xs rounded-full shadow-md hover:scale-105 transition-all"
+            >
+              <span>{isRtl ? "عرض جميع المنتجات" : "View All Products"}</span>
+              {isRtl ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {sortedProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                language={language}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Trust Guarantee Section */}
+        <div className="mt-16 p-6 sm:p-8 bg-white rounded-3xl border border-gray-100 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-start">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 shrink-0">
+              <ShieldCheck size={24} />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                Expert Guidance
-              </h3>
-              <p className="text-gray-600">
-                Licensed pharmacists available for consultation
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                Fast Delivery
-              </h3>
-              <p className="text-gray-600">
-                Same-day delivery in Port Said and major cities
-              </p>
+              <h4 className="text-sm font-extrabold text-gray-900">{isRtl ? "منتجات أصلية 100% ورعاية موثوقة" : "100% Authentic & Certified Care"}</h4>
+              <p className="text-xs text-gray-500">{isRtl ? "جميع المنتجات مفحوصة ومطابقة لمواصفات صيدليات مصر الرسمية" : "All items strictly MOH compliant from licensed pharmacies"}</p>
             </div>
           </div>
+
+          <Link
+            to="/products"
+            className="px-6 py-2.5 bg-slate-100 hover:bg-teal-50 text-teal-800 font-extrabold text-xs rounded-xl border border-slate-200 hover:border-teal-200 transition-all shrink-0"
+          >
+            {isRtl ? "تصفح بقية الكتالوج" : "Explore Catalog"}
+          </Link>
         </div>
-      </section>
+
+      </div>
     </div>
   );
 };

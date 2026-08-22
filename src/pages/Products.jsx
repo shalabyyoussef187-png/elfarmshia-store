@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "../context/LanguageContext";
 import {
@@ -21,20 +22,33 @@ const Products = () => {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const isRtl = language === "ar";
+  const [searchParams] = useSearchParams();
+
+  const initialCat = searchParams.get("category") || searchParams.get("cat") || "";
+  const initialSearch = searchParams.get("search") || searchParams.get("q") || "";
 
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("");
+  const [search, setSearch] = useState(initialSearch);
+  const [category, setCategory] = useState(initialCat);
   const [selectedBrand, setSelectedBrand] = useState("");
   const [availability, setAvailability] = useState("all"); // all | instock | outofstock
   const [priceRange, setPriceRange] = useState(4500);
-  const [searchInput, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useState(initialSearch);
   const [sortBy, setSortBy] = useState("featured");
   const [viewMode, setViewMode] = useState("grid"); // grid | list
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
+
+  // Keep state synced if URL searchParams change
+  useEffect(() => {
+    const cat = searchParams.get("category") || searchParams.get("cat") || "";
+    const q = searchParams.get("search") || searchParams.get("q") || "";
+    setCategory(cat);
+    setSearch(q);
+    setSearchInput(q);
+  }, [searchParams]);
 
   const { products, loading, error, pagination, retry } = useProducts({
     page,

@@ -145,11 +145,11 @@ const Navbar = () => {
           </div>
 
           {/* Center Logo — Clean Proportions */}
-          <Link to="/" className="flex items-center justify-center shrink-0 mx-4 group">
+          <Link to="/" className="flex items-center justify-center shrink-0 mx-2 sm:mx-4 group">
             <img
               src={logoImg}
               alt="AlFarmashia"
-              className="h-11 sm:h-13 md:h-14 w-auto object-contain transition-transform duration-300 group-hover:scale-105 filter drop-shadow-xs"
+              className="h-9 sm:h-12 md:h-13 w-auto max-w-[125px] sm:max-w-[160px] md:max-w-[180px] object-contain shrink-0 transition-transform duration-300 group-hover:scale-105 filter drop-shadow-xs"
             />
           </Link>
 
