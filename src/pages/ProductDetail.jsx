@@ -14,37 +14,18 @@ import {
   ShieldCheck,
   Truck,
   RotateCcw,
-  AlertTriangle,
-  Info,
-  ClipboardList,
-  Zap,
-  Package,
 } from "lucide-react";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=80";
 
-/* ─── small helper: only render a section if it has content ─── */
-const InfoSection = ({ icon: Icon, title, content, colorClass = "teal" }) => {
+/* ─── Simple titled section ─── */
+const InfoSection = ({ title, content }) => {
   if (!content?.trim()) return null;
-
-  const colorMap = {
-    teal:   { bg: "bg-teal-50",   border: "border-teal-100",   icon: "text-teal-600",   title: "text-teal-800"   },
-    amber:  { bg: "bg-amber-50",  border: "border-amber-100",  icon: "text-amber-600",  title: "text-amber-800"  },
-    red:    { bg: "bg-red-50",    border: "border-red-100",    icon: "text-red-600",    title: "text-red-800"    },
-    blue:   { bg: "bg-blue-50",   border: "border-blue-100",   icon: "text-blue-600",   title: "text-blue-800"   },
-    violet: { bg: "bg-violet-50", border: "border-violet-100", icon: "text-violet-600", title: "text-violet-800" },
-  };
-
-  const c = colorMap[colorClass] || colorMap.teal;
-
   return (
-    <div className={`rounded-2xl p-5 border ${c.bg} ${c.border}`}>
-      <div className={`flex items-center gap-2 font-black text-sm mb-3 ${c.title}`}>
-        <Icon size={17} className={c.icon} />
-        {title}
-      </div>
-      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{content}</p>
+    <div className="mb-6">
+      <h3 className="text-xl font-black text-emerald-900 mb-2">{title}</h3>
+      <p className="text-sm text-gray-500 leading-7 whitespace-pre-line">{content}</p>
     </div>
   );
 };
@@ -263,18 +244,6 @@ const ProductDetail = () => {
             </div>
 
             {/* Stock badge */}
-            <div className="mb-5">
-              {inStock ? (
-                <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
-                  <Check size={14} strokeWidth={3} />
-                  {isRtl ? "متوفر في المخزن" : "In Stock – Ready to Ship"}
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-100">
-                  {isRtl ? "غير متوفر حالياً" : "Currently Out of Stock"}
-                </span>
-              )}
-            </div>
 
             {/* Quantity stepper */}
             <div className="mb-5">
@@ -341,49 +310,25 @@ const ProductDetail = () => {
 
         </div>
 
-        {/* ════ BOTTOM DETAILS CARD: features / usage / warnings / info ════ */}
+        {/* ════ PRODUCT EXTRA DETAILS ════ */}
         {(product.features || product.usageInstructions || product.warnings || product.productInfo) && (
-          <div className="bg-white rounded-3xl p-6 sm:p-10 border border-gray-100 shadow-sm">
-            <h2 className="text-xl font-black text-emerald-950 mb-6 flex items-center gap-2">
-              <Package size={22} className="text-teal-600" />
-              {isRtl ? "تفاصيل المنتج" : "Product Details"}
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-              {/* Features / مميزات */}
-              <InfoSection
-                icon={Zap}
-                title={isRtl ? "المميزات" : "Features"}
-                content={product.features}
-                colorClass="teal"
-              />
-
-              {/* Usage Instructions / طريقة الاستخدام */}
-              <InfoSection
-                icon={ClipboardList}
-                title={isRtl ? "طريقة الاستخدام" : "Usage Instructions"}
-                content={product.usageInstructions}
-                colorClass="blue"
-              />
-
-              {/* Warnings / تحذيرات */}
-              <InfoSection
-                icon={AlertTriangle}
-                title={isRtl ? "تحذيرات" : "Warnings"}
-                content={product.warnings}
-                colorClass="red"
-              />
-
-              {/* Product Info / معلومات المنتج */}
-              <InfoSection
-                icon={Info}
-                title={isRtl ? "معلومات المنتج" : "Product Info"}
-                content={product.productInfo}
-                colorClass="violet"
-              />
-
-            </div>
+          <div className="space-y-6 px-1">
+            <InfoSection
+              title={isRtl ? "المميزات" : "Features"}
+              content={product.features}
+            />
+            <InfoSection
+              title={isRtl ? "طريقة الاستخدام" : "Usage Instructions"}
+              content={product.usageInstructions}
+            />
+            <InfoSection
+              title={isRtl ? "تحذيرات" : "Warnings"}
+              content={product.warnings}
+            />
+            <InfoSection
+              title={isRtl ? "معلومات المنتج" : "Product Info"}
+              content={product.productInfo}
+            />
           </div>
         )}
 
