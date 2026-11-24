@@ -212,14 +212,14 @@ const Hero = ({ language = "en" }) => {
   const getDynamicFontSize = (word, lang) => {
     const len = word.length;
     if (lang === "ar") {
-      if (len > 12) return "clamp(34px, 8vw, 105px)";
-      if (len > 8)  return "clamp(44px, 10.5vw, 130px)";
-      return "clamp(56px, 13.5vw, 155px)";
+      if (len > 12) return "clamp(28px, 7vw, 100px)";
+      if (len > 8)  return "clamp(36px, 9vw, 125px)";
+      return "clamp(44px, 11vw, 150px)";
     }
     // English scaling
-    if (len >= 11) return "clamp(40px, 9.5vw, 135px)";
-    if (len >= 8)  return "clamp(50px, 11.5vw, 155px)";
-    return "clamp(60px, 14.5vw, 180px)";
+    if (len >= 11) return "clamp(36px, 8.5vw, 130px)";
+    if (len >= 8)  return "clamp(44px, 10.5vw, 150px)";
+    return "clamp(52px, 13vw, 170px)";
   };
 
   return (
@@ -247,10 +247,10 @@ const Hero = ({ language = "en" }) => {
       <div className="absolute inset-0 bg-gradient-to-t from-[#070b15] via-[#070b15]/35 to-black/20 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-r from-[#070b15]/40 via-transparent to-[#070b15]/40 pointer-events-none" />
 
-      {/* ══ 2. GIANT CATEGORY BACKGROUND FONT (BEHIND THE IMAGE - ALMARAI/CHANGA ARABIC & BEBAS NEUE ENGLISH) ══ */}
+      {/* ══ 2. GIANT CATEGORY BACKGROUND FONT (BEHIND THE IMAGE) ══ */}
       <motion.div
         style={{ x: textX, y: textY }}
-        className="absolute top-[22%] sm:top-[17%] lg:top-[17%] inset-x-0 flex justify-center pointer-events-none z-10 px-4 max-w-full"
+        className="absolute top-[26%] sm:top-[20%] lg:top-[18%] inset-x-0 flex justify-center pointer-events-none z-10 px-4 max-w-full"
       >
         <AnimatePresence mode="wait">
           <motion.div
@@ -259,7 +259,7 @@ const Hero = ({ language = "en" }) => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -10 }}
             transition={{ duration: 0.4 }}
-            className="select-none text-center leading-tight font-black uppercase max-w-full px-2"
+            className="select-none text-center leading-normal font-black uppercase max-w-full px-2 pt-2 sm:pt-0"
             style={{
               fontSize: getDynamicFontSize(language === "en" ? cat.word_en : cat.word_ar, language),
               fontFamily:
@@ -312,7 +312,7 @@ const Hero = ({ language = "en" }) => {
       </div>
 
       {/* ══ 4. BOTTOM FOREGROUND UI ══ */}
-      <div className="relative h-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 flex flex-col justify-end pb-8 sm:pb-10 z-20">
+      <div className="relative h-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 flex flex-col justify-end pb-16 sm:pb-20 lg:pb-14 z-20">
         <div className="grid grid-cols-12 items-end gap-4 sm:gap-6">
 
           {/* Bottom Left: Stacked Stats */}

@@ -1,191 +1,107 @@
-// About page content data
+// Elevated About page pharmaceutical & Port Said heritage content data
 export const aboutContent = {
-  en: {
-    hero: {
-      title: "Your Trusted Healthcare Partner",
-      subtitle:
-        "Connecting you with quality medications and expert pharmaceutical care across Egypt",
-    },
-    story: {
-      tag: "Our Story",
-      title: "From Problem to Solution",
-      subtitle:
-        "Every step of Al-Farmashiia's journey was a response to real challenges people face every day",
-      timeline: [
-        {
-          tag: "The Problem",
-          title: "We saw people struggle to find what they need",
-          body: "Patients searching for specific medications, going from pharmacy to pharmacy, returning empty-handed. The problem wasn't availability — it was information and connection.",
-        },
-        {
-          tag: "The Idea",
-          title: "The solution isn't a directory — it's a smart connector",
-          body: "We decided to create something different: a platform connecting patients, pharmacies, and suppliers in one direct line, without wasting time.",
-        },
-        {
-          tag: "The Present",
-          title: "A complete, working ecosystem",
-          body: "500+ products, partner pharmacies, and direct supply — all in one place with guaranteed quality and fair pricing.",
-        },
-      ],
-    },
-    values: {
-      tag: "Our Values",
-      title: "What Drives Us Forward",
-      items: [
-        {
-          title: "Trust & Quality",
-          body: "Every product is verified and sourced from licensed pharmacies. We never compromise on quality or authenticity.",
-          icon: "shield",
-        },
-        {
-          title: "Transparency",
-          body: "Clear pricing, honest information, and open communication. You deserve to know exactly what you're getting.",
-          icon: "eye",
-        },
-        {
-          title: "Accessibility",
-          body: "Healthcare should be available to everyone. We work to make quality medications accessible and affordable.",
-          icon: "users",
-        },
-        {
-          title: "Innovation",
-          body: "We leverage technology to solve real healthcare problems and improve the pharmacy experience.",
-          icon: "lightbulb",
-        },
-      ],
-    },
-    how: {
-      tag: "How It Works",
-      title: "Simple, Fast, Reliable",
-      steps: [
-        {
-          num: "01",
-          title: "Search with Confidence",
-          body: "Enter medication name or active ingredient — find all medical information, available alternatives, and nearby pharmacies instantly.",
-          tag: "For Patients",
-        },
-        {
-          num: "02",
-          title: "Direct Connection",
-          body: "Partner pharmacies get real-time inventory updates and direct access to verified suppliers.",
-          tag: "For Pharmacies",
-        },
-        {
-          num: "03",
-          title: "Secure Delivery",
-          body: "Fast, reliable delivery with full tracking. Your medications arrive safely at your door.",
-          tag: "For Everyone",
-        },
-      ],
-    },
-    stats: {
-      items: [
-        { number: "500+", label: "Products Available" },
-        { number: "50+", label: "Partner Pharmacies" },
-        { number: "10K+", label: "Happy Customers" },
-        { number: "24/7", label: "Customer Support" },
-      ],
-    },
-    cta: {
-      title: "Ready to Get Started?",
-      subtitle:
-        "Join thousands of Egyptians who trust Al-Farmashiia for their healthcare needs",
-      button: "Browse Products",
-    },
-  },
   ar: {
     hero: {
-      title: "شريكك الموثوق في الرعاية الصحية",
+      tag: "أصالة بورسعيدية بلمسة عصر رائدة",
+      title: "أصل الحكاية.. رعاية تمتد لأكثر من قرن",
       subtitle:
-        "نربطك بالأدوية عالية الجودة والرعاية الصيدلانية المتخصصة في جميع أنحاء مصر",
+        "في شوارع بورسعيد التاريخية، لم تكن الصيدلية مجرد متجر للدواء، بل كانت تُعرف دائماً بـ «الفرماشية». كان الصيدلي هو الملاذ الأول والحكيم الموثوق. أعدنا إحياء الاسم لنقدم نفس روح الاهتمام والأمان بأحدث أدوات الرعاية الرقمية.",
     },
-    story: {
-      tag: "قصتنا",
-      title: "من المشكلة للحل",
-      subtitle:
-        "كل خطوة في رحلة الفرماشيه كانت ردّ فعل على تحديات حقيقية يعيشها الناس كل يوم",
-      timeline: [
-        {
-          tag: "المشكلة",
-          title: "كنا نرى الناس تتعب وهي تبحث عن احتياجاتها",
-          body: "مرضى يبحثون عن أدوية معينة، يذهبون من صيدلية لصيدلية، ويعودون خائبين. المشكلة ليست في التوفر — بل في المعلومات والاتصال.",
-        },
-        {
-          tag: "الفكرة",
-          title: "الحل ليس دليلاً — إنه موصل ذكي",
-          body: "قررنا إنشاء شيء مختلف: منصة تربط المرضى والصيدليات والموردين في خط واحد مباشر، دون إضاعة الوقت.",
-        },
-        {
-          tag: "الحاضر",
-          title: "نظام كامل وعملي",
-          body: "+500 منتج، صيدليات شريكة، وتوريد مباشر — كل ذلك في مكان واحد مع ضمان الجودة والسعر العادل.",
-        },
-      ],
-    },
-    values: {
-      tag: "قيمنا",
-      title: "ما يدفعنا للأمام",
-      items: [
-        {
-          title: "الثقة والجودة",
-          body: "كل منتج تم التحقق منه ومصدره صيدليات مرخصة. لا نتنازل أبداً عن الجودة أو الأصالة.",
-          icon: "shield",
-        },
-        {
-          title: "الشفافية",
-          body: "أسعار واضحة، معلومات صادقة، وتواصل مفتوح. تستحق أن تعرف بالضبط ما تحصل عليه.",
-          icon: "eye",
-        },
-        {
-          title: "إمكانية الوصول",
-          body: "يجب أن تكون الرعاية الصحية متاحة للجميع. نعمل لجعل الأدوية عالية الجودة في متناول الجميع وبأسعار معقولة.",
-          icon: "users",
-        },
-        {
-          title: "الابتكار",
-          body: "نستفيد من التكنولوجيا لحل مشاكل الرعاية الصحية الحقيقية وتحسين تجربة الصيدلية.",
-          icon: "lightbulb",
-        },
-      ],
-    },
-    how: {
-      tag: "كيف نعمل",
-      title: "بسيط، سريع، موثوق",
-      steps: [
-        {
-          num: "01",
-          title: "ابحث بثقة",
-          body: "أدخل اسم الدواء أو المادة الفعالة — اعثر على جميع المعلومات الطبية والبدائل المتاحة والصيدليات القريبة منك فوراً.",
-          tag: "للمرضى",
-        },
-        {
-          num: "02",
-          title: "اتصال مباشر",
-          body: "تحصل الصيدليات الشريكة على تحديثات المخزون في الوقت الفعلي ووصول مباشر للموردين الموثوقين.",
-          tag: "للصيدليات",
-        },
-        {
-          num: "03",
-          title: "توصيل آمن",
-          body: "توصيل سريع وموثوق مع تتبع كامل. تصل أدويتك بأمان إلى باب منزلك.",
-          tag: "للجميع",
-        },
-      ],
-    },
-    stats: {
-      items: [
-        { number: "500+", label: "منتج متاح" },
-        { number: "50+", label: "صيدلية شريكة" },
-        { number: "10K+", label: "عميل سعيد" },
-        { number: "24/7", label: "دعم العملاء" },
-      ],
-    },
+    values: [
+      {
+        id: "wisdom",
+        title: "الحكمة والأمانة",
+        tag: "الرعاية والتشخيص الصيدلي",
+        subtitle: "استشارة طبية موثوقة وروشتة موثقة",
+        description:
+          "نحافظ على إرث الصيدلي الحكيم الذي يضع صحة المريض أولاً. جميع أدويتنا ومستحضراتنا مفحوصة ومستوردة من موزعين مرخصين رسمياً.",
+        icon: "ShieldCheck",
+        accent: "from-amber-500 to-amber-600",
+      },
+      {
+        id: "speed",
+        title: "السرعة والاهتمام",
+        tag: "توصيل فوري وتتبع مباشر",
+        subtitle: "خدمة توصيل فائقة السرعة حتى باب المنزل",
+        description:
+          "نصلك بأدويتك ومستلزماتك الصحية في أسرع وقت مع تتبع لحظي لشحنتك وتغليف طبي دقيق يضمن سلامة وفعالية المواد الفعالة.",
+        icon: "Clock",
+        accent: "from-emerald-600 to-teal-600",
+      },
+      {
+        id: "heritage",
+        title: "أصالة وتكنولوجيا",
+        tag: "الربط الرقمي الذكي",
+        subtitle: "تطبيق عصري يضمن دفء الاهتمام المحلي",
+        description:
+          "دمجنا بين هيبة ودفء «الفرماشية» القديمة وأحدث تكنولوجيا التجارة الإلكترونية، لنقدم تجربة تسوق ورعاية صحية سلسة ومتاحة على مدار الساعة.",
+        icon: "Sparkles",
+        accent: "from-teal-600 to-emerald-700",
+      },
+    ],
+    stats: [
+      { number: "100%", label: "منتجات وأدوية أصلية", sub: "مضمونة ومفحوصة من وزارة الصحة" },
+      { number: "24/7", label: "استشارات صيدلانية", sub: "صيدلي متخصص متواجد دائماً" },
+      { number: "دقائق", label: "توصيل دقيق وسريع", sub: "خدمة شحن فائقة العناية" },
+    ],
     cta: {
-      title: "هل أنت مستعد للبدء؟",
+      title: "صحتك وأمانك في أيدٍ أمينة مع الفرمشية",
       subtitle:
-        "انضم إلى آلاف المصريين الذين يثقون في الفرماشيه لتلبية احتياجاتهم الصحية",
-      button: "تصفح المنتجات",
+        "احصل على استشارة صيدلانية فورية أو تصفح منتجاتنا الطبية والعلاجية المعتمدة بضغطة زر واحدة.",
+      pharmacistBtn: "تحدث مع صيدلي الفرمشية الآن",
+      browseBtn: "تصفح الأدوية والمنتجات",
+    },
+  },
+  en: {
+    hero: {
+      tag: "PORT SAID HERITAGE & DIGITAL INNOVATION",
+      title: "The Origin Story.. Care Spanning Over a Century",
+      subtitle:
+        "In the historic streets of Port Said, a pharmacy was never just a medicine shop — it was affectionately known as 'Al Farmasheia'. The pharmacist was the trusted family healer. We revived this iconic name to bring back that warm, personal care using the most advanced digital healthcare tools.",
+    },
+    values: [
+      {
+        id: "wisdom",
+        title: "Clinical Wisdom & Integrity",
+        tag: "TRUSTED DIAGNOSIS",
+        subtitle: "Verified Prescriptions & Expert Consultation",
+        description:
+          "Preserving the legacy of the trusted apothecary who puts patient well-being first. Every medication and supplement is 100% authentic and MOH-compliant.",
+        icon: "ShieldCheck",
+        accent: "from-amber-500 to-amber-600",
+      },
+      {
+        id: "speed",
+        title: "Speed & Personal Care",
+        tag: "EXPRESS LOGISTICS",
+        subtitle: "Rapid Door-to-Door Delivery with Live Tracking",
+        description:
+          "Delivering your critical health supplies in record time with real-time tracking and medical-grade packaging protecting potency.",
+        icon: "Clock",
+        accent: "from-emerald-600 to-teal-600",
+      },
+      {
+        id: "heritage",
+        title: "Heritage & Modern Tech",
+        tag: "DIGITAL ECOSYSTEM",
+        subtitle: "Seamless E-Commerce Preserving Local Warmth",
+        description:
+          "Bridging the nostalgia of Port Said's classic 'Farmasheia' with cutting-edge e-commerce for a 24/7 seamless healthcare experience.",
+        icon: "Sparkles",
+        accent: "from-teal-600 to-emerald-700",
+      },
+    ],
+    stats: [
+      { number: "100%", label: "Original Medicine", sub: "Strictly MOH Verified" },
+      { number: "24/7", label: "Pharmacist Consultation", sub: "Specialist Care Available" },
+      { number: "Minutes", label: "Fast Doorstep Delivery", sub: "Express Medical Logistics" },
+    ],
+    cta: {
+      title: "Your Health & Safety in Trusted Hands",
+      subtitle:
+        "Connect with a certified Al Farmasheia pharmacist instantly or explore our catalog of certified health products.",
+      pharmacistBtn: "Talk to Al Farmasheia Pharmacist Now",
+      browseBtn: "Browse Medicines & Products",
     },
   },
 };

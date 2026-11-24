@@ -9,6 +9,7 @@ import { ToastProvider } from "./context/ToastContext";
 import { LanguageProvider } from "./context/LanguageContext";
 import ScrollToTop from "./components/common/ScrollToTop";
 import PageTransition from "./components/common/PageTransition";
+import Preloader from "./components/common/Preloader";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import Home from "./pages/Home";
@@ -45,7 +46,8 @@ function AppContent() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/products" element={<Products />} />
-            <Route path="/category/:slug" element={<CategoryPage />} />
+            <Route path="/category/:slug" element={<Products />} />
+            <Route path="/health-need/:slug" element={<Products />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
@@ -82,10 +84,12 @@ function App() {
     <ToastProvider>
       <CartProvider>
         <LanguageProvider>
-          <Router>
-            <ScrollToTop />
-            <AppContent />
-          </Router>
+          <Preloader>
+            <Router>
+              <ScrollToTop />
+              <AppContent />
+            </Router>
+          </Preloader>
         </LanguageProvider>
       </CartProvider>
     </ToastProvider>

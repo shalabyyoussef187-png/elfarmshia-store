@@ -138,77 +138,84 @@ const Cart = () => {
               
               {/* Items Table Container */}
               <div className="bg-white rounded-3xl border border-gray-100 shadow-xs overflow-hidden">
-                {/* Table Header */}
-                <div className="grid grid-cols-12 gap-4 p-4 bg-slate-50 border-b border-gray-100 text-xs font-black text-gray-500 uppercase tracking-wider">
+                {/* Table Header - Desktop Only */}
+                <div className="hidden sm:grid grid-cols-12 gap-4 p-4 bg-slate-50 border-b border-gray-100 text-xs font-black text-gray-500 uppercase tracking-wider">
                   <div className="col-span-6">{isRtl ? "المنتج" : "Product"}</div>
                   <div className="col-span-3 text-center">{isRtl ? "الكمية" : "Quantity"}</div>
                   <div className="col-span-3 text-left rtl:text-right">{isRtl ? "المجموع الفرعي" : "Subtotal"}</div>
                 </div>
 
-                {/* Table Body Items */}
+                {/* Table Body Items - Responsive Grid / Stacked on Mobile */}
                 <div className="divide-y divide-gray-100">
                   {cartItems.map((item) => (
-                    <div key={item.id} className="grid grid-cols-12 gap-4 p-5 items-center hover:bg-slate-50/50 transition-colors">
-                      
-                      {/* Product details (6 Cols) */}
-                      <div className="col-span-6 flex items-center gap-4">
-                        <button
-                          onClick={() => handleRemoveItem(item)}
-                          className="text-gray-400 hover:text-red-600 transition-colors p-1.5 rounded-lg hover:bg-red-50 cursor-pointer"
-                          title={isRtl ? "حذف" : "Remove"}
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                    <div key={item.id} className="p-4 sm:p-5 hover:bg-slate-50/50 transition-colors">
+                      <div className="flex flex-col sm:grid sm:grid-cols-12 gap-3 sm:gap-4 sm:items-center">
+                        
+                        {/* Product details (6 Cols on sm+) */}
+                        <div className="sm:col-span-6 flex items-center justify-between sm:justify-start gap-3 sm:gap-4">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <button
+                              onClick={() => handleRemoveItem(item)}
+                              className="text-gray-400 hover:text-red-600 transition-colors p-1.5 rounded-lg hover:bg-red-50 cursor-pointer shrink-0"
+                              title={isRtl ? "حذف" : "Remove"}
+                            >
+                              <Trash2 size={16} />
+                            </button>
 
-                        <div className="w-16 h-16 rounded-xl bg-slate-50 border border-gray-100 p-2 shrink-0 overflow-hidden flex items-center justify-center">
-                          <img
-                            src={item.image || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop"}
-                            alt={item.name}
-                            className="w-full h-full object-contain"
-                          />
+                            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-50 border border-gray-100 p-1.5 sm:p-2 shrink-0 overflow-hidden flex items-center justify-center">
+                              <img
+                                src={item.image || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop"}
+                                alt={item.name}
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                              <h3 className="text-xs sm:text-sm font-extrabold text-gray-900 leading-snug line-clamp-2">
+                                {item.name}
+                              </h3>
+                              <p className="text-xs text-teal-700 font-bold mt-0.5">
+                                {item.price.toFixed(0)} {isRtl ? "ج.م" : "EGP"}
+                              </p>
+                            </div>
+                          </div>
                         </div>
 
-                        <div>
-                          <h3 className="text-sm font-extrabold text-gray-900 leading-snug line-clamp-2">
-                            {item.name}
-                          </h3>
-                          <p className="text-xs text-teal-700 font-bold mt-1">
-                            {item.price.toFixed(0)} {isRtl ? "ج.م" : "EGP"}
-                          </p>
+                        {/* Mobile bottom row / Desktop columns */}
+                        <div className="flex items-center justify-between sm:contents pt-2 border-t border-gray-100 sm:border-0 sm:pt-0">
+                          {/* Stepper Quantity (3 Cols on sm+) */}
+                          <div className="sm:col-span-3 flex sm:justify-center">
+                            <div className="flex items-center bg-slate-100 border border-slate-200/80 rounded-xl p-1 shadow-xs">
+                              <button
+                                onClick={() => handleUpdateQuantity(item, item.quantity - 1)}
+                                disabled={item.quantity <= 1}
+                                className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-700 font-bold hover:bg-gray-50 disabled:opacity-40 transition-all cursor-pointer"
+                              >
+                                <Minus size={13} strokeWidth={2.5} />
+                              </button>
+                              
+                              <span className="w-8 sm:w-9 text-center font-extrabold text-xs sm:text-sm text-gray-900">
+                                {item.quantity}
+                              </span>
+
+                              <button
+                                onClick={() => handleUpdateQuantity(item, item.quantity + 1)}
+                                className="w-7 h-7 rounded-lg bg-teal-600 text-white flex items-center justify-center font-bold hover:bg-teal-700 transition-all cursor-pointer shadow-xs"
+                              >
+                                <Plus size={13} strokeWidth={2.5} />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Subtotal (3 Cols on sm+) */}
+                          <div className="sm:col-span-3 text-left rtl:text-right">
+                            <span className="text-sm sm:text-base font-black text-emerald-950">
+                              {(item.price * item.quantity).toFixed(0)} {isRtl ? "ج.م" : "EGP"}
+                            </span>
+                          </div>
                         </div>
+
                       </div>
-
-                      {/* Stepper Quantity (3 Cols) */}
-                      <div className="col-span-3 flex justify-center">
-                        <div className="flex items-center bg-slate-100 border border-slate-200/80 rounded-xl p-1 shadow-xs">
-                          <button
-                            onClick={() => handleUpdateQuantity(item, item.quantity - 1)}
-                            disabled={item.quantity <= 1}
-                            className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-700 font-bold hover:bg-gray-50 disabled:opacity-40 transition-all cursor-pointer"
-                          >
-                            <Minus size={13} strokeWidth={2.5} />
-                          </button>
-                          
-                          <span className="w-9 text-center font-extrabold text-sm text-gray-900">
-                            {item.quantity}
-                          </span>
-
-                          <button
-                            onClick={() => handleUpdateQuantity(item, item.quantity + 1)}
-                            className="w-7 h-7 rounded-lg bg-teal-600 text-white flex items-center justify-center font-bold hover:bg-teal-700 transition-all cursor-pointer shadow-xs"
-                          >
-                            <Plus size={13} strokeWidth={2.5} />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Subtotal (3 Cols) */}
-                      <div className="col-span-3 text-left rtl:text-right">
-                        <span className="text-base font-black text-emerald-950">
-                          {(item.price * item.quantity).toFixed(0)} {isRtl ? "ج.م" : "EGP"}
-                        </span>
-                      </div>
-
                     </div>
                   ))}
                 </div>

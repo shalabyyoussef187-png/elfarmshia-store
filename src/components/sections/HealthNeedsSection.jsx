@@ -19,7 +19,7 @@ const HEALTH_NEEDS = [
     description: "Relief for cold symptoms and flu",
     descriptionAr: "علاج أعراض البرد والإنفلونزا",
     icon: Thermometer,
-    link: "/health-need/cold-flu",
+    link: "/products?search=البرد",
   },
   {
     id: 2,
@@ -28,7 +28,7 @@ const HEALTH_NEEDS = [
     description: "Strengthen your immune system",
     descriptionAr: "قوّ جهازك المناعي",
     icon: Shield,
-    link: "/health-need/immunity",
+    link: "/products?category=vitamins-supplements&search=مناعة",
   },
   {
     id: 3,
@@ -37,7 +37,7 @@ const HEALTH_NEEDS = [
     description: "Solutions for healthy, glowing skin",
     descriptionAr: "حلول للبشرة الصحية المتألقة",
     icon: Droplets,
-    link: "/health-need/skin-care",
+    link: "/products?category=skin-care",
   },
   {
     id: 4,
@@ -46,7 +46,7 @@ const HEALTH_NEEDS = [
     description: "Breathe easier and better",
     descriptionAr: "تنفس بشكل أفضل وأسهل",
     icon: Wind,
-    link: "/health-need/respiratory",
+    link: "/products?search=تنفسي",
   },
   {
     id: 5,
@@ -55,7 +55,7 @@ const HEALTH_NEEDS = [
     description: "Gentle care for your little ones",
     descriptionAr: "رعاية لطيفة لأطفالك",
     icon: Baby,
-    link: "/health-need/baby-care",
+    link: "/products?category=mom-baby",
   },
   {
     id: 6,
@@ -64,7 +64,7 @@ const HEALTH_NEEDS = [
     description: "Fast-acting pain management",
     descriptionAr: "إدارة الألم سريعة المفعول",
     icon: Activity,
-    link: "/health-need/pain-relief",
+    link: "/products?search=ألم",
   },
   {
     id: 7,
@@ -73,7 +73,7 @@ const HEALTH_NEEDS = [
     description: "Support cardiovascular wellness",
     descriptionAr: "دعم صحة القلب والأوعية",
     icon: Heart,
-    link: "/health-need/heart",
+    link: "/products?search=قلب",
   },
   {
     id: 8,
@@ -82,7 +82,7 @@ const HEALTH_NEEDS = [
     description: "Improve digestive comfort",
     descriptionAr: "تحسين راحة الجهاز الهضمي",
     icon: Pill,
-    link: "/health-need/digestive",
+    link: "/products?search=هضمي",
   },
 ];
 
