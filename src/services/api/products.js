@@ -1,6 +1,7 @@
 import axios from "axios";
+import { products as localProducts } from "../../data/products";
 
-export const API_BASE_URL = "https://pharma-api-flame.vercel.app/api";
+export const API_BASE_URL = "https://elfarmshia-backend.vercel.app/api";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop";
@@ -30,19 +31,30 @@ const computeOriginalPrice = (product) => {
  *   product.isAvailable (not inStock)
  */
 export const transformProduct = (product) => ({
-  id:             product.id,
-  name:           product.name || "Unknown Product",
-  category:       product.category || null,
-  brand:          product.brand || null,
-  price:          parseFloat(product.price) || 0,
-  originalPrice:  computeOriginalPrice(product),
-  image:          product.imageUrl || FALLBACK_IMAGE,
-  thumbnailUrl:   product.imageThumbnailUrl || null,
-  isAvailable:    product.isAvailable !== false,
-  isBestSeller:   product.isBestSeller || false,
-  isOffer:        product.isOffer || false,
-  discount:       product.isOffer ? (product.offerDiscountPercent || 0) : 0,
-  discountAmount: product.isOffer ? (product.offerDiscountAmount || 0) : 0,
+  id:                   product.id,
+  name:                 product.name || "Unknown Product",
+  description:          product.description || "",
+  features:             product.features || "",
+  usageInstructions:    product.usageInstructions || "",
+  warnings:             product.warnings || "",
+  productInfo:          product.productInfo || "",
+  category:             product.category || null,
+  brand:                product.brand || null,
+  price:                parseFloat(product.price) || 0,
+  originalPrice:        computeOriginalPrice(product),
+  quantity:             product.quantity ?? null,
+  // images – support up to 3 slots from API
+  image:                product.imageUrl  || product.image  || FALLBACK_IMAGE,
+  thumbnailUrl:         product.imageThumbnailUrl  || null,
+  image2:               product.imageUrl2 || null,
+  thumbnailUrl2:        product.imageThumbnailUrl2 || null,
+  image3:               product.imageUrl3 || null,
+  thumbnailUrl3:        product.imageThumbnailUrl3 || null,
+  isAvailable:          product.isAvailable !== false,
+  isBestSeller:         product.isBestSeller || false,
+  isOffer:              product.isOffer || false,
+  discount:             product.isOffer ? (product.offerDiscountPercent || 0) : 0,
+  discountAmount:       product.isOffer ? (product.offerDiscountAmount  || 0) : 0,
 });
 
 /**
@@ -67,16 +79,65 @@ export const fetchProducts = async ({
   if (brand) params.brand = brand;
   if (search) params.search = search;
 
-  const response = await axios.get(`${API_BASE_URL}/products`, { params });
+  try {
+    const response = await axios.get(`${API_BASE_URL}/products`, { params });
 
-  if (response.data?.success && Array.isArray(response.data.data)) {
-    return {
-      data: response.data.data,
-      pagination: response.data.pagination || null,
-    };
+    if (response.data?.success && Array.isArray(response.data.data)) {
+      // ✅ If API returns products → use them
+      if (response.data.data.length > 0) {
+        return {
+          data: response.data.data,
+          pagination: response.data.pagination || null,
+        };
+      }
+
+      // ⚠️ API returned empty → fallback to local data
+      console.warn("API returned 0 products — falling back to local data.");
+      return buildLocalFallback({ page, limit, category, brand, search });
+    }
+  } catch (err) {
+    console.warn("API fetch failed — falling back to local data:", err.message);
   }
 
-  throw new Error("Invalid response structure from /api/products");
+  return buildLocalFallback({ page, limit, category, brand, search });
+};
+
+/**
+ * Filter & paginate local products as a fallback when API is empty.
+ */
+const buildLocalFallback = ({ page, limit, category, brand, search }) => {
+  let filtered = localProducts;
+  if (category) filtered = filtered.filter((p) => p.category === category);
+  if (brand) filtered = filtered.filter((p) => p.brand === brand);
+  if (search) {
+    const q = search.toLowerCase();
+    filtered = filtered.filter(
+      (p) =>
+        p.name?.toLowerCase().includes(q) ||
+        p.nameAr?.includes(search) ||
+        p.description?.toLowerCase().includes(q)
+    );
+  }
+  const total = filtered.length;
+  const pages = Math.ceil(total / limit);
+  const start = (page - 1) * limit;
+  const data = filtered.slice(start, start + limit).map((p) => ({
+    ...p,
+    // Normalise local fields to match API shape
+    imageUrl: p.image,
+    isAvailable: p.inStock !== false,
+  }));
+  return {
+    data,
+    pagination: {
+      total,
+      page,
+      pages,
+      limit,
+      next: page < pages ? page + 1 : null,
+      prev: page > 1 ? page - 1 : null,
+    },
+  };
 };
 
 /**

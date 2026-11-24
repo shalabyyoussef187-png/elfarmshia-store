@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -14,13 +14,40 @@ import {
   ShieldCheck,
   Truck,
   RotateCcw,
-  Leaf,
-  ArrowRight,
-  ArrowLeft,
+  AlertTriangle,
+  Info,
+  ClipboardList,
+  Zap,
+  Package,
 } from "lucide-react";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=80";
+
+/* ─── small helper: only render a section if it has content ─── */
+const InfoSection = ({ icon: Icon, title, content, colorClass = "teal" }) => {
+  if (!content?.trim()) return null;
+
+  const colorMap = {
+    teal:   { bg: "bg-teal-50",   border: "border-teal-100",   icon: "text-teal-600",   title: "text-teal-800"   },
+    amber:  { bg: "bg-amber-50",  border: "border-amber-100",  icon: "text-amber-600",  title: "text-amber-800"  },
+    red:    { bg: "bg-red-50",    border: "border-red-100",    icon: "text-red-600",    title: "text-red-800"    },
+    blue:   { bg: "bg-blue-50",   border: "border-blue-100",   icon: "text-blue-600",   title: "text-blue-800"   },
+    violet: { bg: "bg-violet-50", border: "border-violet-100", icon: "text-violet-600", title: "text-violet-800" },
+  };
+
+  const c = colorMap[colorClass] || colorMap.teal;
+
+  return (
+    <div className={`rounded-2xl p-5 border ${c.bg} ${c.border}`}>
+      <div className={`flex items-center gap-2 font-black text-sm mb-3 ${c.title}`}>
+        <Icon size={17} className={c.icon} />
+        {title}
+      </div>
+      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{content}</p>
+    </div>
+  );
+};
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -29,11 +56,12 @@ const ProductDetail = () => {
   const { addToCart, isInCart } = useCart();
   const { success } = useToast();
 
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [quantity, setQuantity] = useState(1);
+  const [product, setProduct]         = useState(null);
+  const [loading, setLoading]         = useState(true);
+  const [quantity, setQuantity]       = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const [showAddedAnimation, setShowAddedAnimation] = useState(false);
+  const [showAddedAnim, setShowAddedAnim] = useState(false);
+  const [activeImg, setActiveImg]     = useState(0);
 
   useEffect(() => {
     const fetchItem = async () => {
@@ -41,6 +69,7 @@ const ProductDetail = () => {
       try {
         const item = await getProductById(id);
         setProduct(item);
+        setActiveImg(0);
       } catch (err) {
         console.error("Failed to load product detail:", err);
       } finally {
@@ -49,6 +78,12 @@ const ProductDetail = () => {
     };
     if (id) fetchItem();
   }, [id]);
+
+  /* Collect non-null images in order */
+  const images = useMemo(() => {
+    if (!product) return [];
+    return [product.image, product.image2, product.image3].filter(Boolean);
+  }, [product]);
 
   if (loading) {
     return (
@@ -81,23 +116,23 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     addToCart(product, quantity);
-    setShowAddedAnimation(true);
+    setShowAddedAnim(true);
     success(
       isRtl
         ? `تمت إضافة ${quantity} من ${product.name} إلى السلة`
-        : `Added ${quantity} of ${product.name} to cart`,
+        : `Added ${quantity} of ${product.name} to cart`
     );
-    setTimeout(() => setShowAddedAnimation(false), 2000);
+    setTimeout(() => setShowAddedAnim(false), 2000);
   };
 
-  const inCart = isInCart(product._id || product.id);
+  const inCart  = isInCart(product._id || product.id);
   const inStock = product.isAvailable !== false && product.inStock !== false;
-  const imageUrl = product.image || FALLBACK_IMAGE;
+  const currentImage = images[activeImg] || FALLBACK_IMAGE;
 
   return (
-    <div className="min-h-screen bg-[#f8faf9] py-12" dir={isRtl ? "rtl" : "ltr"}>
+    <div className="min-h-screen bg-[#f8faf9] py-10" dir={isRtl ? "rtl" : "ltr"}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Breadcrumb */}
         <div className="mb-6 flex items-center gap-2 text-xs text-gray-500 font-medium">
           <Link to="/" className="hover:text-teal-700">{isRtl ? "الرئيسية" : "Home"}</Link>
@@ -107,18 +142,19 @@ const ProductDetail = () => {
           <span className="text-gray-900 font-extrabold line-clamp-1">{product.name}</span>
         </div>
 
-        {/* Product Detail Card */}
-        <div className="bg-white rounded-3xl p-6 sm:p-10 border border-gray-100 shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-10">
-          
-          {/* Image Section (5 Cols) */}
-          <div className="lg:col-span-5 flex flex-col items-center justify-center">
+        {/* ════ TOP CARD: image + buy panel ════ */}
+        <div className="bg-white rounded-3xl p-6 sm:p-10 border border-gray-100 shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-10 mb-6">
+
+          {/* ── IMAGE COLUMN ── */}
+          <div className="lg:col-span-5 flex flex-col gap-4">
+
+            {/* Main Image Viewer */}
             <div className="relative w-full aspect-square rounded-3xl bg-gradient-to-b from-slate-50 via-teal-50/20 to-slate-50 border border-slate-100 p-8 flex items-center justify-center overflow-hidden">
               {product.discount > 0 && (
-                <div className="absolute top-4 left-4 z-10 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-black shadow-xs">
+                <div className="absolute top-4 left-4 z-10 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-black shadow">
                   -{product.discount}% OFF
                 </div>
               )}
-
               <button
                 onClick={() => setIsWishlisted(!isWishlisted)}
                 className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/90 backdrop-blur-md border border-teal-100 flex items-center justify-center shadow-xs hover:scale-110 transition-transform cursor-pointer"
@@ -127,56 +163,79 @@ const ProductDetail = () => {
               </button>
 
               <img
-                src={imageUrl}
+                key={activeImg}
+                src={currentImage}
                 alt={product.name}
-                className="w-full h-full object-contain filter drop-shadow-lg"
-                onError={(e) => {
-                  e.target.src = FALLBACK_IMAGE;
-                }}
+                className="w-full h-full object-contain filter drop-shadow-lg transition-opacity duration-300"
+                onError={(e) => { e.target.src = FALLBACK_IMAGE; }}
               />
             </div>
+
+            {/* Thumbnail Strip – only shown when there are multiple images */}
+            {images.length > 1 && (
+              <div className="flex gap-3 justify-center">
+                {images.map((src, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveImg(idx)}
+                    className={`w-20 h-20 rounded-2xl border-2 overflow-hidden flex-shrink-0 transition-all duration-200 cursor-pointer
+                      ${activeImg === idx
+                        ? "border-teal-500 shadow-md shadow-teal-200"
+                        : "border-gray-200 hover:border-teal-300 opacity-70 hover:opacity-100"}`}
+                  >
+                    <img
+                      src={src}
+                      alt={`${product.name} ${idx + 1}`}
+                      className="w-full h-full object-contain p-1.5 bg-slate-50"
+                      onError={(e) => { e.target.src = FALLBACK_IMAGE; }}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Details Section (7 Cols) */}
+          {/* ── BUY PANEL ── */}
           <div className="lg:col-span-7 flex flex-col">
-            
-            {/* Category Tag */}
+
+            {/* Category tag */}
             {product.category && (
               <span className="inline-block text-xs font-extrabold text-teal-700 bg-teal-50 border border-teal-100 px-3 py-1 rounded-full mb-3 self-start">
                 {product.category}
               </span>
             )}
 
-            {/* Product Title */}
+            {/* Title */}
             <h1 className="text-2xl sm:text-3xl font-black text-gray-900 leading-tight mb-2 tracking-tight">
               {product.name}
             </h1>
 
             {/* Brand */}
             {product.brand && (
-              <p className="text-xs text-gray-500 mb-4 font-medium">
+              <p className="text-xs text-gray-500 mb-3 font-medium">
                 {isRtl ? "العلامة التجارية: " : "Brand: "}
                 <span className="font-extrabold text-gray-800">{product.brand}</span>
               </p>
             )}
 
-            {/* Ratings */}
-            <div className="flex items-center gap-2 mb-5">
+            {/* Stars */}
+            <div className="flex items-center gap-2 mb-4">
               <div className="flex items-center gap-0.5 text-amber-400">
-                <Star size={16} fill="currentColor" />
-                <Star size={16} fill="currentColor" />
-                <Star size={16} fill="currentColor" />
-                <Star size={16} fill="currentColor" />
-                <Star size={16} fill="currentColor" />
+                {[...Array(5)].map((_, i) => <Star key={i} size={15} fill="currentColor" />)}
               </div>
               <span className="text-xs font-extrabold text-gray-900">4.9</span>
-              <span className="text-xs text-gray-400 font-normal">
-                (120 {isRtl ? "تقييم معتمد" : "verified reviews"})
-              </span>
+              <span className="text-xs text-gray-400">(120 {isRtl ? "تقييم معتمد" : "verified reviews"})</span>
             </div>
 
-            {/* Price Row */}
-            <div className="p-4 rounded-2xl bg-slate-50 border border-gray-100 mb-6">
+            {/* Description (short) */}
+            {product.description && (
+              <p className="text-sm text-gray-600 leading-relaxed mb-5 border-l-4 border-teal-400 pl-4">
+                {product.description}
+              </p>
+            )}
+
+            {/* Price */}
+            <div className="p-4 rounded-2xl bg-slate-50 border border-gray-100 mb-5">
               <div className="flex items-baseline gap-3">
                 <span className="text-3xl font-black text-teal-700">
                   {product.price != null ? product.price.toFixed(0) : "N/A"}
@@ -189,15 +248,26 @@ const ProductDetail = () => {
                     {product.originalPrice.toFixed(0)}
                   </span>
                 )}
+                {product.discount > 0 && (
+                  <span className="text-xs font-extrabold text-red-500 bg-red-50 border border-red-100 px-2 py-0.5 rounded-full">
+                    -{product.discount}%
+                  </span>
+                )}
               </div>
+              {/* Quantity in stock */}
+              {product.quantity != null && (
+                <p className="text-[11px] text-gray-400 mt-1 font-medium">
+                  {isRtl ? `الكمية المتاحة: ${product.quantity} قطعة` : `${product.quantity} units available`}
+                </p>
+              )}
             </div>
 
-            {/* Stock Status Badge */}
-            <div className="mb-6">
+            {/* Stock badge */}
+            <div className="mb-5">
               {inStock ? (
                 <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
                   <Check size={14} strokeWidth={3} />
-                  {isRtl ? "متوفر في المخزن" : "In Stock - Ready to Ship"}
+                  {isRtl ? "متوفر في المخزن" : "In Stock – Ready to Ship"}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-100">
@@ -206,65 +276,54 @@ const ProductDetail = () => {
               )}
             </div>
 
-            {/* Stepper Quantity Selector ([-] quantity [+]) */}
-            <div className="mb-6">
+            {/* Quantity stepper */}
+            <div className="mb-5">
               <label className="block text-xs font-extrabold text-gray-900 uppercase tracking-wider mb-2">
-                {isRtl ? "حدد الكمية:" : "Select Quantity:"}
+                {isRtl ? "الكمية:" : "Quantity:"}
               </label>
-
               <div className="inline-flex items-center bg-slate-100 border border-slate-200/80 rounded-2xl p-1.5 shadow-xs">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   disabled={quantity <= 1}
-                  className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-800 font-bold hover:bg-gray-50 disabled:opacity-40 transition-all cursor-pointer"
+                  className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 disabled:opacity-40 transition-all cursor-pointer"
                 >
                   <Minus size={16} strokeWidth={2.5} />
                 </button>
-
-                <span className="w-14 text-center font-black text-lg text-gray-900">
-                  {quantity}
-                </span>
-
+                <span className="w-14 text-center font-black text-lg text-gray-900">{quantity}</span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
-                  className="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center font-bold hover:bg-teal-700 transition-all cursor-pointer shadow-xs"
+                  className="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center hover:bg-teal-700 transition-all cursor-pointer shadow-xs"
                 >
                   <Plus size={16} strokeWidth={2.5} />
                 </button>
               </div>
             </div>
 
-            {/* Action Button */}
-            <div className="mb-8">
+            {/* CTA */}
+            <div className="mb-6">
               <button
                 onClick={handleAddToCart}
                 disabled={!inStock}
                 className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-teal-600/20 active:scale-95 ${
-                  showAddedAnimation
+                  showAddedAnim
                     ? "bg-emerald-600 text-white"
                     : inCart
-                      ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                      : inStock
-                        ? "bg-teal-600 hover:bg-teal-700 text-white hover:shadow-xl hover:shadow-teal-600/30"
-                        : "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
+                    ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                    : inStock
+                    ? "bg-teal-600 hover:bg-teal-700 text-white hover:shadow-xl hover:shadow-teal-600/30"
+                    : "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
                 }`}
               >
-                {showAddedAnimation ? (
-                  <>
-                    <Check size={18} strokeWidth={2.5} />
-                    {isRtl ? "تمت الإضافة بنجاح ✓" : "Added Successfully ✓"}
-                  </>
+                {showAddedAnim ? (
+                  <><Check size={18} strokeWidth={2.5} />{isRtl ? "تمت الإضافة بنجاح ✓" : "Added Successfully ✓"}</>
                 ) : (
-                  <>
-                    <ShoppingCart size={18} strokeWidth={2.5} />
-                    {isRtl ? "أضف للسلة الآن" : "Add to Cart"}
-                  </>
+                  <><ShoppingCart size={18} strokeWidth={2.5} />{isRtl ? "أضف للسلة الآن" : "Add to Cart"}</>
                 )}
               </button>
             </div>
 
-            {/* Authentic Trust Points */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-6 border-t border-gray-100 text-xs">
+            {/* Trust badges */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-5 border-t border-gray-100 text-xs">
               <div className="flex items-center gap-2 text-gray-700 font-bold">
                 <ShieldCheck size={18} className="text-teal-600 shrink-0" />
                 <span>{isRtl ? "منتج أصلي 100%" : "100% Authentic"}</span>
@@ -278,10 +337,55 @@ const ProductDetail = () => {
                 <span>{isRtl ? "إرجاع مجاني وسهل" : "Easy Returns"}</span>
               </div>
             </div>
-
           </div>
 
         </div>
+
+        {/* ════ BOTTOM DETAILS CARD: features / usage / warnings / info ════ */}
+        {(product.features || product.usageInstructions || product.warnings || product.productInfo) && (
+          <div className="bg-white rounded-3xl p-6 sm:p-10 border border-gray-100 shadow-sm">
+            <h2 className="text-xl font-black text-emerald-950 mb-6 flex items-center gap-2">
+              <Package size={22} className="text-teal-600" />
+              {isRtl ? "تفاصيل المنتج" : "Product Details"}
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              {/* Features / مميزات */}
+              <InfoSection
+                icon={Zap}
+                title={isRtl ? "المميزات" : "Features"}
+                content={product.features}
+                colorClass="teal"
+              />
+
+              {/* Usage Instructions / طريقة الاستخدام */}
+              <InfoSection
+                icon={ClipboardList}
+                title={isRtl ? "طريقة الاستخدام" : "Usage Instructions"}
+                content={product.usageInstructions}
+                colorClass="blue"
+              />
+
+              {/* Warnings / تحذيرات */}
+              <InfoSection
+                icon={AlertTriangle}
+                title={isRtl ? "تحذيرات" : "Warnings"}
+                content={product.warnings}
+                colorClass="red"
+              />
+
+              {/* Product Info / معلومات المنتج */}
+              <InfoSection
+                icon={Info}
+                title={isRtl ? "معلومات المنتج" : "Product Info"}
+                content={product.productInfo}
+                colorClass="violet"
+              />
+
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

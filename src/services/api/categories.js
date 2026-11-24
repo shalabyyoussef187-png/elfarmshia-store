@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://pharma-api-flame.vercel.app/api";
+const API_BASE_URL = "https://elfarmshia-backend.vercel.app/api";
 
 /**
  * Fetch categories from the API

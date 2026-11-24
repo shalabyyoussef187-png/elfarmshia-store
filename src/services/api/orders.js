@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://pharma-api-flame.vercel.app/api";
+const API_URL = "https://elfarmshia-backend.vercel.app/api";
 
 export const ordersAPI = {
   /**

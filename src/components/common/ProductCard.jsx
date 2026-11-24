@@ -93,12 +93,10 @@ const ProductCard = ({ product, language = "en" }) => {
         </h3>
 
         {/* Short Subtitle / Description */}
-        <p className="text-xs text-gray-500 leading-relaxed line-clamp-1 mb-2.5 font-normal">
-          {product.brand
-            ? `${language === "ar" ? "العلامة التجارية: " : "Brand: "}${product.brand}`
-            : language === "ar"
-              ? "تركيبة متطورة عالية الجودة لصحتك اليومية"
-              : "A powerful daily complex for health and vitality"}
+        <p className="text-xs text-gray-500 leading-relaxed line-clamp-2 mb-2.5 font-normal">
+          {language === "ar"
+            ? product.descriptionAr || product.description || (product.brand ? `العلامة التجارية: ${product.brand}` : "تركيبة متطورة عالية الجودة لصحتك اليومية")
+            : product.description || product.descriptionAr || (product.brand ? `Brand: ${product.brand}` : "A powerful daily complex for health and vitality")}
         </p>
 
         {/* Ratings Row */}
