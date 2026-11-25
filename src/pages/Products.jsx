@@ -12,6 +12,8 @@ import {
   Grid,
   List,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Filter,
 } from "lucide-react";
 import { useProducts } from "../hooks/useProducts";
@@ -48,11 +50,12 @@ const Products = () => {
     setCategory(cat);
     setSearch(q);
     setSearchInput(q);
+    setPage(1);
   }, [searchParams]);
 
   const { products, loading, error, pagination, retry } = useProducts({
     page,
-    limit: 16,
+    limit: 8,
     search,
     category,
     brand: selectedBrand,
@@ -96,13 +99,42 @@ const Products = () => {
 
   const hasActiveFilters = search || category || selectedBrand || availability !== "all";
 
-  // Filter products client-side for price & availability
-  const filteredProducts = products.filter((p) => {
-    if (priceRange && p.price > priceRange) return false;
-    if (availability === "instock" && (p.isAvailable === false || p.inStock === false)) return false;
-    if (availability === "outofstock" && (p.isAvailable !== false && p.inStock !== false)) return false;
-    return true;
-  });
+  // Filter & sort products client-side for price, availability & sort
+  const filteredProducts = products
+    .filter((p) => {
+      if (priceRange && p.price > priceRange) return false;
+      if (availability === "instock" && (p.isAvailable === false || p.inStock === false)) return false;
+      if (availability === "outofstock" && (p.isAvailable !== false && p.inStock !== false)) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === "price-low") return (a.price || 0) - (b.price || 0);
+      if (sortBy === "price-high") return (b.price || 0) - (a.price || 0);
+      return 0;
+    });
+
+  const totalPages = pagination?.pages || 1;
+  const totalProducts = pagination?.total ?? filteredProducts.length;
+
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages || newPage === page) return;
+    setPage(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const getPageNumbers = () => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const pages = [1];
+    if (page > 3) pages.push("...");
+    const start = Math.max(2, page - 1);
+    const end = Math.min(totalPages - 1, page + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (page < totalPages - 2) pages.push("...");
+    pages.push(totalPages);
+    return pages;
+  };
 
   return (
     <div className="min-h-screen bg-[#f8faf9] py-8" dir={isRtl ? "rtl" : "ltr"}>
@@ -172,7 +204,10 @@ const Products = () => {
                       type="radio"
                       name="brand"
                       checked={selectedBrand === ""}
-                      onChange={() => setSelectedBrand("")}
+                      onChange={() => {
+                        setSelectedBrand("");
+                        setPage(1);
+                      }}
                       className="accent-teal-600"
                     />
                     <span>{isRtl ? "جميع العلامات" : "All Brands"}</span>
@@ -184,7 +219,10 @@ const Products = () => {
                         type="radio"
                         name="brand"
                         checked={selectedBrand === b}
-                        onChange={() => setSelectedBrand(b)}
+                        onChange={() => {
+                          setSelectedBrand(b);
+                          setPage(1);
+                        }}
                         className="accent-teal-600"
                       />
                       <span>{b}</span>
@@ -279,6 +317,12 @@ const Products = () => {
                 <p className="text-xs text-gray-500 font-bold">
                   {isRtl ? "عرض" : "Showing"}{" "}
                   <span className="font-black text-teal-700">{filteredProducts.length}</span>{" "}
+                  {pagination?.total ? (
+                    <>
+                      {isRtl ? "من أصل" : "of"}{" "}
+                      <span className="font-black text-gray-800">{totalProducts}</span>{" "}
+                    </>
+                  ) : null}
                   {isRtl ? "منتج" : "products"}
                 </p>
               </div>
@@ -360,15 +404,71 @@ const Products = () => {
 
             {/* Product Grid / List */}
             {!loading && !error && filteredProducts.length > 0 && (
-              <div className={viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
-                {filteredProducts.map((product) => (
-                  <ProductCard
-                    key={product._id || product.id}
-                    product={product}
-                    language={language}
-                  />
-                ))}
-              </div>
+              <>
+                <div className={viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
+                  {filteredProducts.map((product) => (
+                    <ProductCard
+                      key={product._id || product.id}
+                      product={product}
+                      language={language}
+                    />
+                  ))}
+                </div>
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-10 pt-6 border-t border-gray-200/80">
+                    <p className="text-xs font-bold text-gray-500">
+                      {isRtl
+                        ? `صفحة ${page} من ${totalPages}`
+                        : `Page ${page} of ${totalPages}`}
+                    </p>
+
+                    <div className="flex items-center justify-center flex-wrap gap-1.5 sm:gap-2" dir="ltr">
+                      <button
+                        onClick={() => handlePageChange(page - 1)}
+                        disabled={page === 1}
+                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-700 disabled:opacity-40 disabled:hover:bg-white disabled:hover:border-gray-200 disabled:hover:text-gray-600 transition-all cursor-pointer shadow-xs"
+                        aria-label="Previous Page"
+                      >
+                        <ChevronLeft size={18} strokeWidth={2.5} />
+                      </button>
+
+                      {getPageNumbers().map((p, idx) =>
+                        p === "..." ? (
+                          <span
+                            key={`ellipsis-${idx}`}
+                            className="px-1.5 text-xs font-bold text-gray-400 select-none"
+                          >
+                            ...
+                          </span>
+                        ) : (
+                          <button
+                            key={p}
+                            onClick={() => handlePageChange(p)}
+                            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full text-xs font-black transition-all cursor-pointer ${
+                              page === p
+                                ? "bg-teal-600 text-white shadow-md shadow-teal-600/25 scale-105"
+                                : "bg-white text-gray-700 border border-gray-200 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-700"
+                            }`}
+                          >
+                            {p}
+                          </button>
+                        )
+                      )}
+
+                      <button
+                        onClick={() => handlePageChange(page + 1)}
+                        disabled={page === totalPages}
+                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-700 disabled:opacity-40 disabled:hover:bg-white disabled:hover:border-gray-200 disabled:hover:text-gray-600 transition-all cursor-pointer shadow-xs"
+                        aria-label="Next Page"
+                      >
+                        <ChevronRight size={18} strokeWidth={2.5} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
           </main>
