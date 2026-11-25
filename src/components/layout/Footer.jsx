@@ -12,7 +12,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { FaFacebook, FaInstagram, FaWhatsapp, FaTiktok } from "react-icons/fa";
-import logoImg from "../../assets/logo.svg";
+import logoImg from "../../assets/logo-transparent.png";
 
 const Footer = () => {
   const { language } = useLanguage();
@@ -159,7 +159,7 @@ const Footer = () => {
           {/* Brand Info Column */}
           <div className="lg:col-span-2 space-y-4">
             <Link to="/" className="inline-block">
-              <img src={logoImg} alt="Al-Farmashia" className="h-14 w-auto object-contain filter drop-shadow-xs" />
+              <img src={logoImg} alt="Al-Farmashia" className="h-14 w-auto object-contain" />
             </Link>
 
             <p className="text-xs sm:text-sm text-gray-600 leading-relaxed max-w-sm font-medium">

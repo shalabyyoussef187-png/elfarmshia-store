@@ -9,7 +9,7 @@ import {
   IoCart,
 } from "react-icons/io5";
 import { useCart } from "../context/CartContext";
-import logoImg from "../assets/logo.svg";
+import logoImg from "../assets/logo-transparent.png";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

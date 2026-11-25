@@ -15,7 +15,7 @@ import { useLanguage } from "../../context/LanguageContext";
 import { getStoredUser, clearAuth } from "../../services/api/auth";
 import Avatar from "../common/Avatar";
 import ConfirmModal from "../common/ConfirmModal";
-import logoImg from "../../assets/logo.svg";
+import logoImg from "../../assets/logo-transparent.png";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -149,7 +149,7 @@ const Navbar = () => {
             <img
               src={logoImg}
               alt="AlFarmashia"
-              className="h-9 sm:h-12 md:h-13 w-auto max-w-[125px] sm:max-w-[160px] md:max-w-[180px] object-contain shrink-0 transition-transform duration-300 group-hover:scale-105 filter drop-shadow-xs"
+              className="h-10 sm:h-12 md:h-13 w-auto max-w-[140px] sm:max-w-[165px] md:max-w-[185px] object-contain shrink-0 transition-transform duration-300 group-hover:scale-105"
             />
           </Link>
 
