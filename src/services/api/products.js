@@ -1,3 +1,4 @@
+import { buildEntry, searchIndex } from "../../utils/catalogSearch";
 import axios from "axios";
 import { products as localProducts } from "../../data/products";
 
@@ -67,6 +68,28 @@ export const transformProduct = (product) => ({
  * @param {string} params.search
  * @returns {Promise<{ data: Array, pagination: Object }>}
  */
+let catalogPromise = null;
+const loadCatalog = () => {
+  if (!catalogPromise) {
+    catalogPromise = (async () => {
+      const out = [];
+      let page = 1;
+      let pages = 1;
+      do {
+        const res = await axios.get(`${API_BASE_URL}/products`, { params: { page, limit: 50 } });
+        pages = res.data?.pagination?.pages || 1;
+        out.push(...(res.data?.data || []));
+        page += 1;
+      } while (page <= pages);
+      return out;
+    })().catch((e) => {
+      catalogPromise = null;
+      throw e;
+    });
+  }
+  return catalogPromise;
+};
+
 export const fetchProducts = async ({
   page = 1,
   limit = 20,
@@ -74,6 +97,26 @@ export const fetchProducts = async ({
   brand = "",
   search = "",
 } = {}) => {
+  // Text search: match on the full catalog (Arabic, digits, typos), same as the header suggestions.
+  if (search) {
+    try {
+      const all = await loadCatalog();
+      const entries = all.map((p) => ({ ...buildEntry(p), raw: p }));
+      let found = searchIndex(entries, search, Infinity).items.map((e) => e.raw);
+      if (category) found = found.filter((p) => p.category === category);
+      if (brand) found = found.filter((p) => p.brand === brand);
+      const total = found.length;
+      const pages = Math.max(1, Math.ceil(total / limit));
+      const start = (page - 1) * limit;
+      return {
+        data: found.slice(start, start + limit),
+        pagination: { total, page, pages, limit, next: page < pages ? page + 1 : null, prev: page > 1 ? page - 1 : null },
+      };
+    } catch (err) {
+      console.warn("Catalog search failed, using server search:", err.message);
+    }
+  }
+
   const params = { page, limit };
   if (category) params.category = category;
   if (brand) params.brand = brand;
