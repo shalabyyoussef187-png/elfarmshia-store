@@ -174,8 +174,12 @@ export const fetchDiscountProducts = async () => {
 export const getProductById = async (id) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/products/${id}`);
-    if (response.data?.success && response.data.data) {
-      return transformProduct(response.data.data);
+    // The API returns the product object directly (older versions wrapped it
+    // in { success, data }), so accept both shapes.
+    const body = response.data;
+    const item = body?.data && body?.success ? body.data : body;
+    if (item && item.id && item.name) {
+      return transformProduct(item);
     }
   } catch (err) {
     console.error("Failed to fetch product by ID, trying fallback list:", err);
@@ -184,4 +188,3 @@ export const getProductById = async (id) => {
   const all = await fetchAllProducts(50);
   return all.find((p) => String(p.id) === String(id) || String(p._id) === String(id)) || null;
 };
-
