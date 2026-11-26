@@ -368,6 +368,11 @@ const Products = () => {
                   <span>{isRtl ? "الفلاتر" : "Filters"}</span>
                 </button>
 
+                {loading ? (
+                  <p className="text-xs text-gray-400 font-bold">
+                    {isRtl ? "جاري التحميل..." : "Loading..."}
+                  </p>
+                ) : (
                 <p className="text-xs text-gray-500 font-bold">
                   {isRtl ? "عرض" : "Showing"}{" "}
                   <span className="font-black text-teal-700">{filteredProducts.length}</span>{" "}
@@ -379,6 +384,7 @@ const Products = () => {
                   ) : null}
                   {isRtl ? "منتج" : "products"}
                 </p>
+                )}
               </div>
 
               {/* Sort By & View Controls */}
