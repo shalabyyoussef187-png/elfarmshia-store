@@ -69,7 +69,7 @@ export const transformProduct = (product) => ({
  * @returns {Promise<{ data: Array, pagination: Object }>}
  */
 let catalogPromise = null;
-const loadCatalog = () => {
+export const loadCatalog = () => {
   if (!catalogPromise) {
     catalogPromise = (async () => {
       const out = [];
