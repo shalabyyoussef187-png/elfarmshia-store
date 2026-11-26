@@ -87,7 +87,7 @@ export default function SearchBox({
       try {
         const index = await loadIndex();
         if (cancelled) return;
-        const res = searchIndex(index, term);
+        const res = searchIndex(index, term, 30);
         setItems(res.items);
         setApprox(res.approx);
         setActive(-1);
