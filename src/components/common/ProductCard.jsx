@@ -16,7 +16,6 @@ const ProductCard = ({ product, language = "en" }) => {
   const { success } = useToast();
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [showAddedAnimation, setShowAddedAnimation] = useState(false);
-  const [selectedVariant, setSelectedVariant] = useState(0);
 
   const productId = product._id || product.id;
   const inCart = isInCart(productId);
@@ -134,40 +133,11 @@ const ProductCard = ({ product, language = "en" }) => {
           )}
         </div>
 
-        {/* Feature Pills (Natural badge & Capsule selector) */}
+        {/* Feature Pills (Natural badge) */}
         <div className="flex items-center justify-between gap-2 mb-4">
           <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-bold">
             <Leaf size={13} />
             <span>{language === "ar" ? "طبيعي 100%" : "Natural"}</span>
-          </div>
-
-          <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200/70 text-[11px]">
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                setSelectedVariant(0);
-              }}
-              className={`px-2.5 py-1 rounded-lg font-extrabold transition-all cursor-pointer ${
-                selectedVariant === 0
-                  ? "bg-white text-teal-800 shadow-xs"
-                  : "text-gray-500 hover:text-gray-900"
-              }`}
-            >
-              60 Cap
-            </button>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                setSelectedVariant(1);
-              }}
-              className={`px-2.5 py-1 rounded-lg font-extrabold transition-all cursor-pointer ${
-                selectedVariant === 1
-                  ? "bg-white text-teal-800 shadow-xs"
-                  : "text-gray-500 hover:text-gray-900"
-              }`}
-            >
-              120 Cap
-            </button>
           </div>
         </div>
 
