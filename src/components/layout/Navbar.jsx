@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import SearchBox from "../common/SearchBox";
 import { useTranslation } from "react-i18next";
 import {
   Globe,
@@ -23,8 +24,7 @@ const Navbar = () => {
   const { t } = useTranslation();
   const { language, toggleLanguage } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchFocused, setSearchFocused] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -121,27 +121,8 @@ const Navbar = () => {
               </Link>
             )}
 
-            {/* Search Input Bar — Aligned Height */}
-            <div className="relative flex-1 max-w-[210px] xl:max-w-[250px] h-10 flex items-center">
-              <Search
-                size={16}
-                strokeWidth={2}
-                className={`absolute ${language === "ar" ? "right-3.5" : "left-3.5"} top-1/2 -translate-y-1/2 transition-colors duration-200 ${
-                  searchFocused ? "text-teal-600" : "text-gray-400"
-                }`}
-              />
-              <input
-                type="text"
-                placeholder={t("common.searchProducts")}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setSearchFocused(false)}
-                className={`w-full h-10 text-xs text-gray-800 bg-gray-100/80 border border-gray-200/50 rounded-full focus:bg-white focus:ring-2 focus:ring-teal-500/30 transition-all duration-200 outline-none placeholder-gray-400 ${
-                  language === "ar" ? "pr-9 pl-3.5" : "pl-9 pr-3.5"
-                }`}
-              />
-            </div>
+            {/* Search with live suggestions */}
+            <SearchBox language={language} className="flex-1 max-w-[230px] xl:max-w-[270px]" inputClassName="!h-10 !text-xs" />
           </div>
 
           {/* Center Logo — Clean Proportions */}
@@ -191,6 +172,13 @@ const Navbar = () => {
 
           {/* Mobile Menu Controls */}
           <div className="lg:hidden flex items-center gap-2">
+            <button
+              onClick={() => setSearchOpen((v) => !v)}
+              aria-label="Search"
+              className="p-2.5 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all"
+            >
+              {searchOpen ? <X size={18} strokeWidth={2} /> : <Search size={18} strokeWidth={2} />}
+            </button>
             <Link
               to="/cart"
               className="relative p-2.5 rounded-full bg-emerald-50 text-teal-700 border border-emerald-200/50"
@@ -211,6 +199,11 @@ const Navbar = () => {
             </button>
           </div>
         </nav>
+        {searchOpen && (
+          <div className="lg:hidden mt-2 bg-white/95 backdrop-blur-2xl rounded-3xl border border-gray-200/80 shadow-2xl p-3" dir={language === "ar" ? "rtl" : "ltr"}>
+            <SearchBox language={language} autoFocus inline onDone={() => setSearchOpen(false)} />
+          </div>
+        )}
       </header>
 
       {/* Mobile Drawer Menu */}
@@ -239,15 +232,8 @@ const Navbar = () => {
           </div>
 
           {/* Search Bar */}
-          <div className="relative mb-6">
-            <Search size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder={t("common.searchProducts")}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pr-11 pl-4 py-3 bg-gray-50 rounded-full text-sm text-gray-700 outline-none focus:ring-2 focus:ring-teal-500/20"
-            />
+          <div className="mb-6">
+            <SearchBox language={language} inline onDone={() => setIsMenuOpen(false)} />
           </div>
 
           {/* Nav Links */}
