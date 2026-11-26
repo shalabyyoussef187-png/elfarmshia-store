@@ -71,6 +71,8 @@ export default function SearchBox({
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const boxRef = useRef(null);
+  const panelRef = useRef(null);
+  const [maxH, setMaxH] = useState(null);
 
   useEffect(() => {
     const term = q.trim();
@@ -141,6 +143,27 @@ export default function SearchBox({
   };
 
   const showPanel = open && q.trim().length >= 2;
+
+  // Keep the panel inside the visible screen (phone keyboards shrink it) and let the list scroll inside.
+  useEffect(() => {
+    if (!showPanel) return undefined;
+    const fit = () => {
+      const el = panelRef.current;
+      if (!el) return;
+      const vv = window.visualViewport;
+      const vh = vv ? vv.height : window.innerHeight;
+      const top = el.getBoundingClientRect().top - (vv ? vv.offsetTop : 0);
+      setMaxH(Math.max(180, Math.floor(vh - top - 12)));
+    };
+    fit();
+    const vv = window.visualViewport;
+    window.addEventListener("resize", fit);
+    if (vv) vv.addEventListener("resize", fit);
+    return () => {
+      window.removeEventListener("resize", fit);
+      if (vv) vv.removeEventListener("resize", fit);
+    };
+  }, [showPanel, items.length]);
   const L = isRtl
     ? {
         ph: "ابحث عن المنتجات...",
@@ -196,17 +219,19 @@ export default function SearchBox({
 
       {showPanel && (
         <div
+          ref={panelRef}
           dir={isRtl ? "rtl" : "ltr"}
+          style={maxH ? { maxHeight: maxH } : undefined}
           className={`${
             inline ? "mt-2" : "absolute z-[60] mt-2 left-0 right-0"
-          } bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden`}
+          } bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden flex flex-col`}
         >
           {items.length === 0 ? (
             <p className="px-4 py-3 text-sm text-gray-500">{loading ? L.loading : L.none}</p>
           ) : (
             <>
               {approx && <p className="px-4 pt-3 text-xs text-gray-400">{L.close}</p>}
-              <ul>
+              <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
                 {items.map((p, i) => (
                   <li key={p.id}>
                     <button
@@ -244,7 +269,7 @@ export default function SearchBox({
               <button
                 type="button"
                 onClick={goResults}
-                className="w-full px-4 py-2.5 text-xs font-bold text-teal-700 bg-gray-50 border-t border-gray-100 text-start"
+                className="w-full shrink-0 px-4 py-2.5 text-xs font-bold text-teal-700 bg-gray-50 border-t border-gray-100 text-start"
               >
                 {L.all} “<bdi>{q.trim()}</bdi>”
               </button>
