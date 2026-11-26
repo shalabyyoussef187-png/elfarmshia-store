@@ -8,7 +8,6 @@ import {
   ShoppingCart,
   Check,
   Heart,
-  Star,
   Plus,
   Minus,
   ShieldCheck,
@@ -198,15 +197,6 @@ const ProductDetail = () => {
                 <span className="font-extrabold text-gray-800">{product.brand}</span>
               </p>
             )}
-
-            {/* Stars */}
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center gap-0.5 text-amber-400">
-                {[...Array(5)].map((_, i) => <Star key={i} size={15} fill="currentColor" />)}
-              </div>
-              <span className="text-xs font-extrabold text-gray-900">4.9</span>
-              <span className="text-xs text-gray-400">(120 {isRtl ? "تقييم معتمد" : "verified reviews"})</span>
-            </div>
 
             {/* Description (short) */}
             {product.description && (
