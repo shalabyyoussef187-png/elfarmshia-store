@@ -1,3 +1,4 @@
+import PaymentLogos from "../common/PaymentLogos";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
@@ -243,8 +244,7 @@ const Footer = () => {
           <div className="flex items-center gap-3">
             <span className="text-[11px] font-bold text-gray-400">{isRtl ? "وسائل الدفع المقبولة:" : "Accepted Payments:"}</span>
             <div className="flex items-center gap-2">
-              <span className="px-2 py-1 bg-white border border-gray-200 rounded-md text-[10px] font-bold text-gray-700 shadow-xs">VISA</span>
-              <span className="px-2 py-1 bg-white border border-gray-200 rounded-md text-[10px] font-bold text-gray-700 shadow-xs">Mastercard</span>
+              <PaymentLogos />
               <span className="px-2 py-1 bg-teal-50 border border-teal-200 text-teal-700 rounded-md text-[10px] font-bold shadow-xs">Vodafone Cash</span>
               <span className="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-md text-[10px] font-bold shadow-xs">الدفع عند الاستلام</span>
             </div>
