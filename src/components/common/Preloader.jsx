@@ -11,17 +11,11 @@ const Preloader = ({ children }) => {
   useEffect(() => {
     let isMounted = true;
     const startTime = Date.now();
-    const minWaitMs = 600; // Minimum time for smooth animation feel
+    const minWaitMs = 150; // Short minimum so the splash does not flash
 
-    const checkReady = async () => {
-      try {
-        if ("fonts" in document) {
-          await document.fonts.ready;
-        }
-      } catch (e) {
-        // Fallback if fonts API fails
-      }
-
+    // Do not wait for web fonts: they use font-display: swap and replace the fallback
+    // when they arrive. Only keep the splash for a brief moment so it does not flash.
+    const checkReady = () => {
       const elapsed = Date.now() - startTime;
       const remaining = Math.max(0, minWaitMs - elapsed);
 
