@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+
+// Lists already loaded in this visit, so Back shows them instantly (then refreshes quietly).
+const listCache = new Map();
 import { fetchProducts, transformProduct } from "../services/api/products";
 
 /**
@@ -20,14 +23,22 @@ export const useProducts = ({
   search = "",
   autoFetch = true,
 } = {}) => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const cacheKey = JSON.stringify({ page, limit, category, brand, search });
+  const cached = listCache.get(cacheKey);
+  const [products, setProducts] = useState(cached ? cached.products : []);
+  const [loading, setLoading] = useState(!cached);
   const [error, setError] = useState(null);
-  const [pagination, setPagination] = useState(null);
+  const [pagination, setPagination] = useState(cached ? cached.pagination : null);
 
   const loadProducts = async () => {
     try {
-      setLoading(true);
+      const hit = listCache.get(cacheKey);
+      if (hit) {
+        setProducts(hit.products);
+        setPagination(hit.pagination);
+      } else {
+        setLoading(true);
+      }
       setError(null);
 
       const response = await fetchProducts({
@@ -41,6 +52,7 @@ export const useProducts = ({
       // Transform products for consistent use
       const transformedProducts = response.data.map(transformProduct);
 
+      listCache.set(cacheKey, { products: transformedProducts, pagination: response.pagination });
       setProducts(transformedProducts);
       setPagination(response.pagination);
     } catch (err) {
