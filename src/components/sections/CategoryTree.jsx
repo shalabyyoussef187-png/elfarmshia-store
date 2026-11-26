@@ -50,7 +50,14 @@ const link = (cat) => "/products?category=" + encodeURIComponent(cat);
 
 export default function CategoryTree({ language = "en" }) {
   const isRtl = language === "ar";
-  const [counts, setCounts] = useState(null);
+  // Show the last known counts at once (saved from the previous visit), refresh quietly after.
+  const [counts, setCounts] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("catCounts") || "null");
+    } catch {
+      return null;
+    }
+  });
   const [open, setOpen] = useState(null);
 
   useEffect(() => {
@@ -61,6 +68,9 @@ export default function CategoryTree({ language = "en" }) {
         const c = {};
         for (const p of all) c[p.category] = (c[p.category] || 0) + 1;
         setCounts(c);
+        try {
+          localStorage.setItem("catCounts", JSON.stringify(c));
+        } catch { /* storage full or blocked: ignore */ }
       })
       .catch(() => {});
     return () => {
@@ -88,6 +98,13 @@ export default function CategoryTree({ language = "en" }) {
         </h2>
 
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-8 gap-y-5 gap-x-2">
+          {!counts &&
+            GROUPS.map((g) => (
+              <div key={g.key} className="flex flex-col items-center animate-pulse">
+                <span className="w-[72px] h-[72px] rounded-full bg-teal-50 border-2 border-teal-100" />
+                <span className="mt-2 h-3 w-16 rounded bg-gray-100" />
+              </div>
+            ))}
           {groups.map((g) => {
             const Icon = g.icon;
             const single = g.subs.length === 1;
