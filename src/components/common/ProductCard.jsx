@@ -1,6 +1,6 @@
 import { useCart } from "../../context/CartContext";
 import { useToast } from "../../context/ToastContext";
-import { ShoppingCart, Check, Heart, Star, Leaf } from "lucide-react";
+import { ShoppingCart, Check, Heart } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -98,21 +98,6 @@ const ProductCard = ({ product, language = "en" }) => {
             : product.description || product.descriptionAr || (product.brand ? `Brand: ${product.brand}` : "A powerful daily complex for health and vitality")}
         </p>
 
-        {/* Ratings Row */}
-        <div className="flex items-center gap-1.5 mb-3">
-          <div className="flex items-center gap-0.5 text-amber-400">
-            <Star size={13} fill="currentColor" />
-            <Star size={13} fill="currentColor" />
-            <Star size={13} fill="currentColor" />
-            <Star size={13} fill="currentColor" />
-            <Star size={13} fill="currentColor" />
-          </div>
-          <span className="text-xs font-black text-gray-900">4.8</span>
-          <span className="text-[11px] text-gray-400 font-normal">
-            (1021 {language === "ar" ? "تقييم" : "reviews"})
-          </span>
-        </div>
-
         {/* Price Row */}
         <div className="flex items-baseline gap-2 mb-3.5">
           <span className="text-2xl font-black text-teal-700 tracking-tight">
@@ -131,14 +116,6 @@ const ProductCard = ({ product, language = "en" }) => {
               (-{product.discount}%)
             </span>
           )}
-        </div>
-
-        {/* Feature Pills (Natural badge) */}
-        <div className="flex items-center justify-between gap-2 mb-4">
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-bold">
-            <Leaf size={13} />
-            <span>{language === "ar" ? "طبيعي 100%" : "Natural"}</span>
-          </div>
         </div>
 
         {/* Spacer */}
