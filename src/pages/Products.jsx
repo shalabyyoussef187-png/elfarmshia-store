@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams, useLocation, useNavigationType } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "../context/LanguageContext";
 import {
@@ -29,7 +29,26 @@ const Products = () => {
   const initialCat = searchParams.get("category") || searchParams.get("cat") || "";
   const initialSearch = searchParams.get("search") || searchParams.get("q") || "";
 
-  const [page, setPage] = useState(1);
+  // Remember page + scroll so Back from a product returns to the same place in the list.
+  const location = useLocation();
+  const navType = useNavigationType();
+  const listKey = "products-list:" + location.pathname + location.search;
+  const saved = useRef(null);
+  if (saved.current === null) {
+    saved.current = { page: 1, y: 0 };
+    if (navType === "POP") {
+      try {
+        const raw = sessionStorage.getItem(listKey);
+        if (raw) saved.current = JSON.parse(raw);
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+  const pendingY = useRef(saved.current.y || 0);
+  const skipPageReset = useRef(saved.current.page > 1);
+
+  const [page, setPage] = useState(saved.current.page || 1);
   const [search, setSearch] = useState(initialSearch);
   const [category, setCategory] = useState(initialCat);
   const [selectedBrand, setSelectedBrand] = useState("");
@@ -50,7 +69,11 @@ const Products = () => {
     setCategory(cat);
     setSearch(q);
     setSearchInput(q);
-    setPage(1);
+    if (skipPageReset.current) {
+      skipPageReset.current = false;
+    } else {
+      setPage(1);
+    }
   }, [searchParams]);
 
   const { products, loading, error, pagination, retry } = useProducts({
@@ -60,6 +83,37 @@ const Products = () => {
     category,
     brand: selectedBrand,
   });
+
+  // Save the scroll position while browsing the list.
+  useEffect(() => {
+    const save = () => {
+      // Once the URL has moved on (e.g. to a product page) the scroll reset
+      // of the new page must not overwrite the saved list position.
+      if (window.location.pathname !== location.pathname) return;
+      // Not restored yet: keep the saved position instead of overwriting it.
+      if (pendingY.current > 0) return;
+      try {
+        sessionStorage.setItem(
+          listKey,
+          JSON.stringify({ page, y: Math.round(window.scrollY) })
+        );
+      } catch {
+        /* ignore */
+      }
+    };
+    window.addEventListener("scroll", save, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", save);
+    };
+  }, [listKey, page]);
+
+  // After the list has loaded, put the scroll back where it was (once).
+  useEffect(() => {
+    if (loading || pendingY.current <= 0) return;
+    const y = pendingY.current;
+    pendingY.current = 0;
+    requestAnimationFrame(() => window.scrollTo(0, y));
+  }, [loading, products]);
 
   // Extract unique categories & brands from backend
   useEffect(() => {
