@@ -3,22 +3,14 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Search } from "lucide-react";
 import { API_BASE_URL } from "../../services/api/products";
+import { buildEntry, searchIndex } from "../../utils/catalogSearch";
 
 const FALLBACK_IMG =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect width='80' height='80' fill='%23f1f5f4'/></svg>";
 
 // ---- Catalog index (loaded once, kept in memory and in sessionStorage) ----
-const INDEX_KEY = "search-index-v1";
+const INDEX_KEY = "search-index-v2";
 let indexPromise = null;
-
-const norm = (t) =>
-  String(t || "")
-    .toLowerCase()
-    .replace(/[\u064B-\u065F\u0670\u0640]/g, "")
-    .replace(/[أإآ]/g, "ا")
-    .replace(/ى/g, "ي")
-    .replace(/ة/g, "ه")
-    .trim();
 
 function loadIndex() {
   if (indexPromise) return indexPromise;
@@ -36,15 +28,7 @@ function loadIndex() {
       const res = await axios.get(`${API_BASE_URL}/products`, { params: { page, limit: 50 } });
       pages = res.data?.pagination?.pages || 1;
       for (const p of res.data?.data || []) {
-        out.push({
-          id: p.id,
-          name: p.name,
-          price: p.price,
-          img: p.imageThumbnailUrl || p.imageUrl || null,
-          out: p.isAvailable === false || p.quantity === 0,
-          n: norm(p.name),
-          rest: norm([p.brand, p.category, (p.description || "").slice(0, 300)].join(" ")),
-        });
+        out.push(buildEntry(p));
       }
       page += 1;
     } while (page <= pages);
@@ -59,46 +43,6 @@ function loadIndex() {
     throw e;
   });
   return indexPromise;
-}
-
-function editDistance(a, b) {
-  const m = a.length;
-  const n = b.length;
-  const d = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]);
-  for (let j = 1; j <= n; j++) d[0][j] = j;
-  for (let i = 1; i <= m; i++)
-    for (let j = 1; j <= n; j++)
-      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
-  return d[m][n];
-}
-
-function searchIndex(index, query) {
-  const tokens = norm(query).split(/\s+/).filter(Boolean);
-  if (!tokens.length) return { items: [], approx: false };
-  const hits = [];
-  for (const p of index) {
-    if (!tokens.every((t) => p.n.includes(t) || p.rest.includes(t))) continue;
-    const inName = tokens.every((t) => p.n.includes(t));
-    const starts = tokens.some((t) => p.n.split(/[\s-]+/).some((w) => w.startsWith(t)));
-    hits.push({ p, score: (inName ? 4 : 0) + (starts ? 2 : 0) + (p.out ? 0 : 1) });
-  }
-  if (hits.length) {
-    hits.sort((x, y) => y.score - x.score);
-    return { items: hits.slice(0, 6).map((h) => h.p), approx: false };
-  }
-  // Typos: compare each word of the query with the words of each name.
-  const near = [];
-  for (const p of index) {
-    const words = p.n.split(/[^a-z0-9\u0600-\u06FF]+/).filter(Boolean);
-    const ok = tokens.every((t) => {
-      const lim = t.length >= 7 ? 2 : t.length >= 4 ? 1 : 0;
-      return words.some(
-        (w) => editDistance(t, w) <= lim || (t.length >= 4 && editDistance(t, w.slice(0, t.length)) <= lim)
-      );
-    });
-    if (ok) near.push(p);
-  }
-  return { items: near.slice(0, 6), approx: near.length > 0 };
 }
 
 /**
