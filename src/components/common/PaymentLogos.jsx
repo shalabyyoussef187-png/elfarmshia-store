@@ -28,18 +28,17 @@ export const MastercardLogo = () => (
   </Tile>
 );
 
-export const MeezaLogo = () => (
-  <Tile label="Meeza">
-    <svg viewBox="0 0 60 20" className="h-5 w-auto">
-      <text x="30" y="15" textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontWeight="800" fontSize="14" fill="#00853E">meeza</text>
-      <rect x="8" y="17" width="44" height="2" rx="1" fill="#E31E24" />
+export const InstaPayLogo = () => (
+  <Tile label="InstaPay">
+    <svg viewBox="0 0 70 20" className="h-5 w-auto">
+      <text x="35" y="15" textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontWeight="800" fontSize="13" fill="#5B2A86">insta<tspan fill="#E4007C">pay</tspan></text>
     </svg>
   </Tile>
 );
 
 const PaymentLogos = () => (
   <div className="flex items-center gap-2">
-    <MeezaLogo />
+    <InstaPayLogo />
     <VisaLogo />
     <MastercardLogo />
   </div>
