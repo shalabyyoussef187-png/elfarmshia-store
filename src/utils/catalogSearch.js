@@ -62,8 +62,105 @@ export function buildEntry(p) {
     img: p.imageThumbnailUrl || p.imageUrl || null,
     out: p.isAvailable === false || p.quantity === 0,
     n: norm(p.name),
+    b: norm(p.brand),
     rest: norm([p.brand, p.category, (p.description || "").slice(0, 300)].join(" ")),
   };
+}
+
+// ---- Sound-alike matching: Arabic and English spellings of the same name share one key ----
+// "برفكتيل" and "Perfectil" both become "brfktl" (vowels dropped, similar consonants merged).
+const AR_KEY = {
+  ب: "b", ت: "t", ط: "t", ث: "s", س: "s", ص: "s", ز: "s", ظ: "s", ذ: "s",
+  د: "d", ض: "d", ر: "r", ل: "l", م: "m", ن: "n", ف: "f",
+  ك: "k", ق: "k", ج: "k", غ: "k", خ: "k", ش: "x",
+};
+
+export function phonKey(word) {
+  let w = norm(word);
+  if (!w) return "";
+  if (/[\u0600-\u06FF]/.test(w)) w = w.replace(/^ال(?=.{3})/, "");
+  w = w
+    .replace(/sh|ch/g, "x")
+    .replace(/kh|gh|ck|qu/g, "k")
+    .replace(/ph/g, "f")
+    .replace(/th/g, "t")
+    .replace(/x/g, "x")
+    .replace(/c(?=[eiy])/g, "s")
+    .replace(/[cgjq]/g, "k")
+    .replace(/v/g, "f")
+    .replace(/p/g, "b")
+    .replace(/z/g, "s");
+  let out = "";
+  for (const ch of w) {
+    const m = AR_KEY[ch];
+    if (m) out += m;
+    else if (/[a-z]/.test(ch)) out += ch;
+    else if (/[0-9]/.test(ch)) out += ch;
+  }
+  out = out.replace(/[aeiouywh]/g, "").replace(/(.)\1+/g, "$1");
+  return out;
+}
+
+const wordsOf = (t) => String(t || "").split(/[^a-z0-9\u0600-\u06FF]+/).filter(Boolean);
+
+// Phonetic keys of the name words (and brand) of an entry, computed once per entry.
+function keysOf(p) {
+  if (!p.pk) {
+    p.pk = [...new Set([...wordsOf(p.n), ...wordsOf(p.b)].map(phonKey).filter((k) => k.length >= 2))];
+  }
+  return p.pk;
+}
+
+// Score how well a query token (as a key) matches a product: 0 = no match.
+function keyScore(p, tk) {
+  let best = 0;
+  for (const k of keysOf(p)) {
+    if (k === tk) best = Math.max(best, 4);
+    else if (tk.length >= 3 && k.startsWith(tk)) best = Math.max(best, 3);
+    else if (tk.length >= 4 && editDistance(tk, k) <= (tk.length >= 8 ? 2 : 1)) best = Math.max(best, 2);
+    else if (tk.length >= 5 && editDistance(tk, k.slice(0, tk.length)) <= 1) best = Math.max(best, 2);
+  }
+  return best;
+}
+
+function phoneticSearch(index, tokens) {
+  const tks = tokens.map(phonKey).filter((k) => k.length >= 2);
+  if (!tks.length) return [];
+  const hits = [];
+  for (const p of index) {
+    let total = 0;
+    let ok = true;
+    for (const tk of tks) {
+      const sc = keyScore(p, tk);
+      if (!sc) {
+        ok = false;
+        break;
+      }
+      total += sc;
+    }
+    if (ok) hits.push({ p, score: total * 2 + (p.out ? 0 : 1) });
+  }
+  hits.sort((x, y) => y.score - x.score);
+  return hits.map((h) => h.p);
+}
+
+// Last resort: the closest names by sound, so the list is never empty for a real attempt.
+function closest(index, tokens, limit) {
+  const tks = tokens.map(phonKey).filter((k) => k.length >= 2);
+  if (!tks.length) return [];
+  const scored = [];
+  for (const p of index) {
+    let sum = 0;
+    for (const tk of tks) {
+      let d = Infinity;
+      for (const k of keysOf(p)) d = Math.min(d, editDistance(tk, k.slice(0, Math.max(tk.length, 3))));
+      sum += d / Math.max(tk.length, 3);
+    }
+    const r = sum / tks.length;
+    if (r < 0.25) scored.push({ p, r });
+  }
+  scored.sort((x, y) => x.r - y.r);
+  return scored.slice(0, limit).map((h) => h.p);
 }
 
 export function editDistance(a, b) {
@@ -116,5 +213,12 @@ export function searchIndex(index, query, limit = 6) {
     });
     if (ok) near.push(p);
   }
-  return { items: near.slice(0, limit), approx: near.length > 0 };
+  // Sound-alike (Arabic spelling of an English name, spelling variants, typos).
+  const seen = new Set(near.map((p) => p.id));
+  const sound = phoneticSearch(index, tokens).filter((p) => !seen.has(p.id));
+  const merged = [...sound, ...near];
+  if (merged.length) return { items: merged.slice(0, limit), approx: true };
+  // Nothing matches: offer the closest names instead of an empty list.
+  const close = closest(index, tokens, limit);
+  return { items: close, approx: close.length > 0 };
 }
