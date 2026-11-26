@@ -2,7 +2,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { useTranslation } from "react-i18next";
 import { useHomeData } from "../hooks/useHomeData";
 import Hero from "../components/sections/Hero";
-import CategoriesSection from "../components/sections/CategoriesSection";
+import CategoryTree from "../components/sections/CategoryTree";
 import ProductsSection from "../components/sections/ProductsSection";
 import HealthNeedsSection from "../components/sections/HealthNeedsSection";
 import TrustSection from "../components/sections/TrustSection";
@@ -26,14 +26,7 @@ const Home = () => {
       <Hero language={language} />
 
       {/* 2. Categories Section */}
-      <CategoriesSection
-        categoryNames={categoryNames}
-        allProducts={allProducts}
-        language={language}
-        loading={loading}
-        error={error}
-        retry={retry}
-      />
+      <CategoryTree language={language} />
 
       {/* 3. Best Sellers Section */}
       <ProductsSection
