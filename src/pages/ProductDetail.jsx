@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
+import RelatedProducts from "../components/sections/RelatedProducts";
 import { getProductById } from "../services/api/products";
 import {
   ShoppingCart,
@@ -321,6 +322,8 @@ const ProductDetail = () => {
             />
           </div>
         )}
+
+        <RelatedProducts product={product} isRtl={isRtl} />
 
       </div>
     </div>
