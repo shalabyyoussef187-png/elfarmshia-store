@@ -330,7 +330,7 @@ const Hero = ({ language = "en" }) => {
       </div>
 
       {/* ══ 4. BOTTOM FOREGROUND UI ══ */}
-      <div className="relative h-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 flex flex-col justify-end pb-16 sm:pb-20 lg:pb-14 z-20">
+      <div className="relative h-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 flex flex-col justify-end pb-16 sm:pb-20 lg:pb-14 z-20 pointer-events-none">
         <div className="grid grid-cols-12 items-end gap-4 sm:gap-6">
 
           {/* Bottom Left: Stacked Stats */}
@@ -341,7 +341,7 @@ const Hero = ({ language = "en" }) => {
           </div>
 
           {/* Bottom Center: Headline + Subtitle + Glowing Shop Now Button with OUTWARD Arrows */}
-          <div className="col-span-12 sm:col-span-6 flex flex-col items-center text-center px-2">
+          <div className="col-span-12 sm:col-span-6 flex flex-col items-center text-center px-2 pointer-events-auto">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeCategory + "-center-text"}
