@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useSearchParams, useLocation, useNavigationType } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "../context/LanguageContext";
@@ -46,6 +46,11 @@ const Products = () => {
     }
   }
   const pendingY = useRef(saved.current.y || 0);
+  // Coming back to a list: start at the top while it loads, so a short loading
+  // page never shows the footer.
+  useLayoutEffect(() => {
+    if (pendingY.current > 0) window.scrollTo(0, 0);
+  }, []);
   const skipPageReset = useRef(saved.current.page > 1);
 
   const [page, setPage] = useState(saved.current.page || 1);
