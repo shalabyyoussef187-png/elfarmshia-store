@@ -28,11 +28,30 @@ const VITAMIN_LETTERS = {
 // "فيتامين دي 3" -> the exact vitamin, i.e. "vitamin d3" (whole letter, not any "d").
 // Returns a RegExp, or null when the query is not a spelled-out vitamin letter.
 function vitaminPattern(query) {
-  const m = norm(query).match(/^(?:فيتامين|vitamin)\s+(\S+?)\s*(\d{1,2})?$/);
-  if (!m) return null;
-  const letter = VITAMIN_LETTERS[m[1]] || (/^[a-e]$|^k$/.test(m[1]) ? m[1] : null);
+  const q = norm(query);
+  // "فيتامين دي 3", "vitamin d3", "دي 3", "d3", "b12"
+  let m = q.match(/^(?:فيتامين|vitamin)\s+(\S+?)\s*(\d{1,2})?$/);
+  let letter = null;
+  let num = null;
+  if (m) {
+    letter = VITAMIN_LETTERS[m[1]] || (/^[a-ek]$/.test(m[1]) ? m[1] : null);
+    num = m[2];
+  } else if ((m = q.match(/^(دي|سي|اي|ايه|كي|بي)\s*(\d{1,2})$/))) {
+    letter = VITAMIN_LETTERS[m[1]];
+    num = m[2];
+  } else if ((m = q.match(/^([a-ek])\s*(\d{1,2})$/))) {
+    letter = m[1];
+    num = m[2];
+  }
   if (!letter) return null;
-  return new RegExp(`vitamin\\s*${letter}${m[2] ? "\\s*" + m[2] : ""}(?![a-z])`);
+  return new RegExp(`vitamin\\s*${letter}${num ? "\\s*" + num : ""}(?![a-z])`);
+}
+
+// In brand/category/description text a word must START with the typed token
+// (short tokens must be a whole word), so "دي" does not match inside other words.
+function inRest(rest, t) {
+  const words = rest.split(/[^a-z0-9\u0600-\u06FF]+/);
+  return t.length <= 2 ? words.includes(t) : words.some((w) => w.startsWith(t));
 }
 
 export function buildEntry(p) {
@@ -73,7 +92,7 @@ export function searchIndex(index, query, limit = 6) {
   for (const p of index) {
     let best = -1;
     for (const tokens of variants) {
-      if (!tokens.every((t) => p.n.includes(t) || p.rest.includes(t))) continue;
+      if (!tokens.every((t) => p.n.includes(t) || inRest(p.rest, t))) continue;
       const inName = tokens.every((t) => p.n.includes(t));
       const starts = tokens.some((t) => p.n.split(/[\s-]+/).some((w) => w.startsWith(t)));
       best = Math.max(best, (inName ? 4 : 0) + (starts ? 2 : 0) + (p.out ? 0 : 1));
