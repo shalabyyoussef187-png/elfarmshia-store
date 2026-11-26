@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Pill,
   Sparkles,
@@ -69,6 +70,8 @@ const Hero = ({ language = "en" }) => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [countStarted, setCountStarted] = useState(false);
   const sectionRef = useRef(null);
+  const navigate = useNavigate();
+  const touchStart = useRef(null);
 
   /* Mouse parallax - active on desktop (>1024px) */
   const rawX = useMotionValue(0);
@@ -106,7 +109,7 @@ const Hero = ({ language = "en" }) => {
       headline_ar: "جمال مشرق",
       subtitle_en: "Expert formulations for glowing, healthy skin",
       subtitle_ar: "تركيبات متخصصة ومضمونة لبشرة متألقة",
-      targetSectionId: "skincare-section",
+      targetPath: "/products?category=%D8%A7%D9%84%D8%B4%D8%B9%D8%B1%20%D9%88%D8%A7%D9%84%D8%A8%D8%B4%D8%B1%D8%A9%20%D9%88%D8%A7%D9%84%D8%A3%D8%B8%D8%A7%D9%81%D8%B1",
       accentText: "text-pink-400",
       btnBg: "bg-teal-500 hover:bg-teal-400 text-gray-950 font-extrabold shadow-lg shadow-teal-500/40",
       thumbImage: catSkincare,
@@ -122,7 +125,7 @@ const Hero = ({ language = "en" }) => {
       headline_ar: "قوة يومية",
       subtitle_en: "Essential nutrients for vibrant daily health",
       subtitle_ar: "عناصر أساسية لصحة نابضة بالحياة يومياً",
-      targetSectionId: "vitamins-section",
+      targetPath: "/products?category=%D9%81%D9%8A%D8%AA%D8%A7%D9%85%D9%8A%D9%86%D8%A7%D8%AA%20%D9%85%D8%AA%D8%B9%D8%AF%D8%AF%D8%A9",
       accentText: "text-amber-400",
       btnBg: "bg-teal-500 hover:bg-teal-400 text-gray-950 font-extrabold shadow-lg shadow-teal-500/40",
       thumbImage: catVitamins,
@@ -138,7 +141,7 @@ const Hero = ({ language = "en" }) => {
       headline_ar: "أداء مثالي",
       subtitle_en: "Science-backed nutrition for your active goals",
       subtitle_ar: "تغذية مدعومة علمياً لتحقيق أهدافك",
-      targetSectionId: "supplements-section",
+      targetPath: "/products?category=%D8%A7%D9%84%D8%AA%D8%BA%D8%B0%D9%8A%D8%A9%20%D8%A7%D9%84%D8%B1%D9%8A%D8%A7%D8%B6%D9%8A%D8%A9",
       accentText: "text-teal-400",
       btnBg: "bg-teal-500 hover:bg-teal-400 text-gray-950 font-extrabold shadow-lg shadow-teal-500/40",
       thumbImage: catSupplements,
@@ -154,7 +157,7 @@ const Hero = ({ language = "en" }) => {
       headline_ar: "لمسة حنونة",
       subtitle_en: "Safe, trusted care for your little ones",
       subtitle_ar: "رعاية آمنة وموثوقة لأطفالك",
-      targetSectionId: "babycare-section",
+      targetPath: "/products",
       accentText: "text-blue-400",
       btnBg: "bg-teal-500 hover:bg-teal-400 text-gray-950 font-extrabold shadow-lg shadow-teal-500/40",
       thumbImage: catBabycare,
@@ -170,7 +173,7 @@ const Hero = ({ language = "en" }) => {
       headline_ar: "طقوس العناية",
       subtitle_en: "Elevate your daily wellness routine",
       subtitle_ar: "ارتقِ بروتينك الصحي والعناية اليومية",
-      targetSectionId: "personalcare-section",
+      targetPath: "/products",
       accentText: "text-purple-400",
       btnBg: "bg-teal-500 hover:bg-teal-400 text-gray-950 font-extrabold shadow-lg shadow-teal-500/40",
       thumbImage: catPersonalcare,
@@ -199,13 +202,24 @@ const Hero = ({ language = "en" }) => {
     setTimeout(() => setIsTransitioning(false), 500);
   };
 
-  const handleScrollToSection = () => {
-    const el = document.getElementById(cat.targetSectionId);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-      el.classList.add("highlight-flash");
-      setTimeout(() => el.classList.remove("highlight-flash"), 2000);
-    }
+  // Open the products of the current slide's category.
+  const handleShopNow = () => navigate(cat.targetPath);
+
+  // Finger swipe: left = next slide, right = previous (same as the arrows).
+  const onTouchStart = (e) => {
+    const t = e.touches[0];
+    touchStart.current = { x: t.clientX, y: t.clientY };
+  };
+  const onTouchEnd = (e) => {
+    const st = touchStart.current;
+    touchStart.current = null;
+    if (!st) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - st.x;
+    const dy = t.clientY - st.y;
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+    if (dx < 0) handleNext();
+    else handlePrev();
   };
 
   // Helper to scale font size based on word length for responsiveness
@@ -227,6 +241,9 @@ const Hero = ({ language = "en" }) => {
       ref={sectionRef}
       className="relative w-full h-screen min-h-[660px] overflow-hidden bg-[#070b15]"
       onMouseMove={handleMouseMove}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+      style={{ touchAction: "pan-y" }}
     >
       {/* ══ 1. PHARMACY BACKGROUND IMAGE (hero2.png) ══ */}
       <motion.div
@@ -259,7 +276,8 @@ const Hero = ({ language = "en" }) => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -10 }}
             transition={{ duration: 0.4 }}
-            className="select-none text-center leading-normal font-black uppercase max-w-full px-2 pt-2 sm:pt-0"
+            onClick={handleShopNow}
+            className="select-none text-center leading-normal font-black uppercase max-w-full px-2 pt-2 sm:pt-0 pointer-events-auto cursor-pointer"
             style={{
               fontSize: getDynamicFontSize(language === "en" ? cat.word_en : cat.word_ar, language),
               fontFamily:
@@ -290,7 +308,7 @@ const Hero = ({ language = "en" }) => {
               ? "w-[180px] sm:w-[220px] md:w-[260px] mt-14 sm:mt-18"
               : "w-[200px] sm:w-[240px] md:w-[280px] mt-12 sm:mt-16"
           } aspect-[16/10] rounded-2xl overflow-hidden border-2 border-white/40 shadow-[0_0_50px_rgba(20,184,166,0.35)] backdrop-blur-2xl relative pointer-events-auto group cursor-pointer`}
-          onClick={handleScrollToSection}
+          onClick={handleShopNow}
         >
           <AnimatePresence mode="wait">
             <motion.img
@@ -333,7 +351,7 @@ const Hero = ({ language = "en" }) => {
                 transition={{ duration: 0.3 }}
                 className="max-w-md"
               >
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-1 tracking-tight drop-shadow-md">
+                <h2 onClick={handleShopNow} className="text-2xl sm:text-3xl font-extrabold text-white mb-1 tracking-tight drop-shadow-md cursor-pointer">
                   {language === "en" ? cat.headline_en : cat.headline_ar}
                 </h2>
                 <p className="text-xs sm:text-sm text-gray-300 font-light leading-relaxed mb-4 line-clamp-2">
@@ -356,7 +374,7 @@ const Hero = ({ language = "en" }) => {
 
               {/* Main CTA Button */}
               <button
-                onClick={handleScrollToSection}
+                onClick={handleShopNow}
                 className={`group flex items-center gap-2 px-6 py-2.5 sm:px-7 sm:py-3 rounded-full text-xs sm:text-sm transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer ${cat.btnBg}`}
               >
                 <span>{language === "en" ? "Shop Now" : "تسوق الآن"}</span>
@@ -424,16 +442,6 @@ const Hero = ({ language = "en" }) => {
         </div>
       </div>
 
-      {/* CSS Flash Animation */}
-      <style>{`
-        @keyframes highlight-flash {
-          0%, 100% { background-color: transparent; }
-          50% { background-color: rgba(20, 184, 166, 0.2); }
-        }
-        .highlight-flash {
-          animation: highlight-flash 2s ease-in-out;
-        }
-      `}</style>
     </section>
   );
 };
