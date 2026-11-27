@@ -14,6 +14,7 @@ import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
+import Browse from "./pages/Browse";
 import CategoryPage from "./pages/CategoryPage";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
@@ -47,6 +48,7 @@ function AppContent() {
             <Route path="/" element={<Home />} />
             <Route path="/products" element={<Products />} />
             <Route path="/category/:slug" element={<Products />} />
+            <Route path="/browse/*" element={<Browse />} />
             <Route path="/health-need/:slug" element={<Products />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
