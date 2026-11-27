@@ -4,9 +4,9 @@ import { ShoppingCart, Check, Heart, Minus, Plus } from "lucide-react";
 import { toggleWishlist as toggleSaved, useWishlist } from "../../utils/wishlist";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { PLACEHOLDER_IMAGE } from "../../utils/placeholder";
 
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop";
+const FALLBACK_IMAGE = PLACEHOLDER_IMAGE;
 
 /**
  * Pristine Light Luxury Glass Product Card
@@ -118,7 +118,7 @@ const ProductCard = ({ product, language = "en", layout = "grid" }) => {
         )}
 
         {/* Product Title in Almarai Font */}
-        <h3 className={`text-lg font-extrabold text-gray-900 mb-1 ${isList ? "line-clamp-2 text-base" : "line-clamp-1"} leading-snug tracking-tight group-hover:text-teal-700 transition-colors`}>
+        <h3 className={`font-extrabold text-gray-900 mb-1 text-[15px] sm:text-base line-clamp-3 break-words leading-snug tracking-tight group-hover:text-teal-700 transition-colors`}>
           {product.name}
         </h3>
 
