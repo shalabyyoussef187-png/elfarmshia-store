@@ -28,7 +28,7 @@ const HEALTH_NEEDS = [
     description: "Strengthen your immune system",
     descriptionAr: "قوّ جهازك المناعي",
     icon: Shield,
-    link: "/products?category=vitamins-supplements&search=مناعة",
+    link: "/products?category=%D8%A7%D9%84%D9%81%D9%8A%D8%AA%D8%A7%D9%85%D9%8A%D9%86%D8%A7%D8%AA%20%D9%88%D8%A7%D9%84%D9%85%D9%83%D9%85%D9%84%D8%A7%D8%AA&search=%D9%85%D9%86%D8%A7%D8%B9%D8%A9",
   },
   {
     id: 3,
@@ -37,7 +37,7 @@ const HEALTH_NEEDS = [
     description: "Solutions for healthy, glowing skin",
     descriptionAr: "حلول للبشرة الصحية المتألقة",
     icon: Droplets,
-    link: "/products?category=skin-care",
+    link: "/products?category=%D8%A7%D9%84%D8%B9%D9%86%D8%A7%D9%8A%D8%A9%20%D8%A8%D8%A7%D9%84%D8%A8%D8%B4%D8%B1%D8%A9",
   },
   {
     id: 4,
@@ -55,7 +55,7 @@ const HEALTH_NEEDS = [
     description: "Gentle care for your little ones",
     descriptionAr: "رعاية لطيفة لأطفالك",
     icon: Baby,
-    link: "/products?category=mom-baby",
+    link: "/products?category=%D8%A7%D9%84%D8%A3%D9%85%20%D9%88%D8%A7%D9%84%D8%B7%D9%81%D9%84",
   },
   {
     id: 6,
