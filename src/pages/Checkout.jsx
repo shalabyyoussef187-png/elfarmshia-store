@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { isFreeShipping, FREE_SHIPPING_MIN } from "../utils/shipping";
 import { useLanguage } from "../context/LanguageContext";
 import {
   CreditCard,
@@ -536,7 +537,21 @@ const Checkout = () => {
                   </div>
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>{t("cart.shipping")}</span>
-                    <span className="font-semibold text-green-600">{t("cart.shippingFree")}</span>
+                    {isFreeShipping(formData.city, totalPrice) ? (
+                      <span className="font-semibold text-green-600">
+                        {language === "ar" ? "مجاناً (بورسعيد، فوق ٣٠٠ ج)" : "Free (Port Said, over 300 EGP)"}
+                      </span>
+                    ) : (
+                      <span className="font-semibold text-gray-700 text-end">
+                        {formData.city === "Port Said"
+                          ? language === "ar"
+                            ? `يتحدد عند التأكيد (مجاني فوق ${FREE_SHIPPING_MIN} ج)`
+                            : `Set on confirmation (free over ${FREE_SHIPPING_MIN} EGP)`
+                          : language === "ar"
+                            ? "يتحدد عند تأكيد الطلب"
+                            : "Set on order confirmation"}
+                      </span>
+                    )}
                   </div>
                 </div>
 
