@@ -2,7 +2,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { useTranslation } from "react-i18next";
 import { useHomeData } from "../hooks/useHomeData";
 import Hero from "../components/sections/Hero";
-import CategoryTree from "../components/sections/CategoryTree";
+import CategoryHome from "../components/sections/CategoryHome";
 import ProductsSection from "../components/sections/ProductsSection";
 import HealthNeedsSection from "../components/sections/HealthNeedsSection";
 import TrustSection from "../components/sections/TrustSection";
@@ -22,11 +22,11 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-white -mt-24">
-      {/* 1. Hero Section */}
-      <Hero language={language} />
+      {/* 1. Categories first, so they show as soon as the store opens */}
+      <CategoryHome language={language} />
 
-      {/* 2. Categories Section */}
-      <CategoryTree language={language} />
+      {/* 2. Hero Section */}
+      <Hero language={language} />
 
       {/* 3. Best Sellers Section */}
       <ProductsSection

@@ -9,7 +9,7 @@ const FALLBACK_IMG =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect width='80' height='80' fill='%23f1f5f4'/></svg>";
 
 // ---- Catalog index (loaded once, kept in memory and in sessionStorage) ----
-const INDEX_KEY = "search-index-v3";
+const INDEX_KEY = "search-index-v4";
 let indexPromise = null;
 
 function loadIndex() {
@@ -25,7 +25,7 @@ function loadIndex() {
     let page = 1;
     let pages = 1;
     do {
-      const res = await axios.get(`${API_BASE_URL}/products`, { params: { page, limit: 400 } });
+      const res = await axios.get(`${API_BASE_URL}/products`, { params: { page, limit: 2000 } });
       pages = res.data?.pagination?.pages || 1;
       for (const p of res.data?.data || []) {
         out.push(buildEntry(p));
