@@ -1,6 +1,7 @@
 import { useCart } from "../../context/CartContext";
 import { useToast } from "../../context/ToastContext";
-import { ShoppingCart, Check, Heart } from "lucide-react";
+import { ShoppingCart, Check, Heart, Minus, Plus } from "lucide-react";
+import { toggleWishlist as toggleSaved, useWishlist } from "../../utils/wishlist";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -12,9 +13,10 @@ const FALLBACK_IMAGE =
  * Exact layout from the reference image, rendered in a crisp, ultra-clean light aesthetic!
  */
 const ProductCard = ({ product, language = "en" }) => {
-  const { addToCart, isInCart } = useCart();
+  const { addToCart, isInCart, getItemQuantity, updateQuantity } = useCart();
   const { success } = useToast();
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const wishlist = useWishlist();
+  const isWishlisted = wishlist.has(product);
   const [showAddedAnimation, setShowAddedAnimation] = useState(false);
 
   const productId = product._id || product.id;
@@ -36,7 +38,13 @@ const ProductCard = ({ product, language = "en" }) => {
 
   const toggleWishlist = (e) => {
     e.preventDefault();
-    setIsWishlisted(!isWishlisted);
+    e.stopPropagation();
+    toggleSaved(product);
+    success(
+      language === "ar"
+        ? isWishlisted ? "اتشالت من المفضلة" : "اتضافت للمفضلة"
+        : isWishlisted ? "Removed from wishlist" : "Saved to wishlist",
+    );
   };
 
   return (
@@ -52,6 +60,7 @@ const ProductCard = ({ product, language = "en" }) => {
         {/* Wishlist Heart Button */}
         <button
           onClick={toggleWishlist}
+          aria-label="wishlist"
           className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-white/90 backdrop-blur-md border border-teal-100 flex items-center justify-center shadow-xs hover:scale-110 active:scale-95 transition-all cursor-pointer"
         >
           <Heart
@@ -63,6 +72,20 @@ const ProductCard = ({ product, language = "en" }) => {
             }`}
           />
         </button>
+
+        {/* Discount badge */}
+        {(() => {
+          const pct = product.discount > 0
+            ? Math.round(product.discount)
+            : product.originalPrice && product.originalPrice > product.price
+              ? Math.round((1 - product.price / product.originalPrice) * 100)
+              : 0;
+          return pct > 0 ? (
+            <span dir="ltr" className="absolute top-3 left-3 z-10 rounded-full bg-red-500 px-2.5 py-1 text-[11px] font-black text-white shadow-sm">
+              -{pct}%
+            </span>
+          ) : null;
+        })()}
 
         {/* Product Image */}
         <img
@@ -86,6 +109,13 @@ const ProductCard = ({ product, language = "en" }) => {
 
       {/* ── Card Content Area ── */}
       <div className="flex flex-col flex-1 pt-4 px-1 pb-1">
+        {inStock && (
+          <span className="mb-1.5 inline-flex w-fit items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-extrabold text-emerald-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            {language === "ar" ? "متوفر" : "In stock"}
+          </span>
+        )}
+
         {/* Product Title in Almarai Font */}
         <h3 className="text-lg font-extrabold text-gray-900 mb-1 line-clamp-1 leading-snug tracking-tight group-hover:text-teal-700 transition-colors">
           {product.name}
@@ -111,17 +141,36 @@ const ProductCard = ({ product, language = "en" }) => {
               {product.originalPrice.toFixed(0)}
             </span>
           )}
-          {product.discount > 0 && (
-            <span className="text-xs font-extrabold text-red-500 bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
-              (-{product.discount}%)
-            </span>
-          )}
         </div>
 
         {/* Spacer */}
         <div className="flex-1" />
 
         {/* ── Glowing Teal CTA Button ── */}
+        {inCart && inStock ? (
+          <div
+            className="flex w-full items-center justify-between rounded-2xl bg-emerald-600 px-2 py-1.5 text-white shadow-md shadow-teal-600/20"
+            onClick={(e) => e.preventDefault()}
+          >
+            <button
+              aria-label="decrease"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); updateQuantity(productId, getItemQuantity(productId) - 1); }}
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 hover:bg-white/30 active:scale-95 cursor-pointer"
+            >
+              <Minus size={16} strokeWidth={3} />
+            </button>
+            <span className="text-sm font-black">
+              {getItemQuantity(productId)} {language === "ar" ? "في السلة" : "in cart"}
+            </span>
+            <button
+              aria-label="increase"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); updateQuantity(productId, getItemQuantity(productId) + 1); }}
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 hover:bg-white/30 active:scale-95 cursor-pointer"
+            >
+              <Plus size={16} strokeWidth={3} />
+            </button>
+          </div>
+        ) : (
         <button
           onClick={handleAddToCart}
           disabled={!inStock}
@@ -150,6 +199,7 @@ const ProductCard = ({ product, language = "en" }) => {
             </>
           )}
         </button>
+        )}
       </div>
     </Link>
   );
