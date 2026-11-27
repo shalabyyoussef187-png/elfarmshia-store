@@ -1,11 +1,10 @@
 import { buildEntry, searchIndex } from "../../utils/catalogSearch";
 import axios from "axios";
-import { products as localProducts } from "../../data/products";
+import { PLACEHOLDER_IMAGE } from "../../utils/placeholder";
 
 export const API_BASE_URL = "https://elfarmshia-backend.vercel.app/api";
 
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop";
+const FALLBACK_IMAGE = PLACEHOLDER_IMAGE;
 
 /**
  * Compute the original (pre-discount) price for display purposes.
@@ -123,65 +122,13 @@ export const fetchProducts = async ({
   if (brand) params.brand = brand;
   if (search) params.search = search;
 
-  try {
-    const response = await axios.get(`${API_BASE_URL}/products`, { params });
-
-    if (response.data?.success && Array.isArray(response.data.data)) {
-      // ✅ If API returns products → use them
-      if (response.data.data.length > 0) {
-        return {
-          data: response.data.data,
-          pagination: response.data.pagination || null,
-        };
-      }
-
-      // ⚠️ API returned empty → fallback to local data
-      console.warn("API returned 0 products — falling back to local data.");
-      return buildLocalFallback({ page, limit, category, brand, search });
-    }
-  } catch (err) {
-    console.warn("API fetch failed — falling back to local data:", err.message);
+  // No sample data: if the server fails, the error reaches the page (error + retry state).
+  const response = await axios.get(`${API_BASE_URL}/products`, { params });
+  const body = response.data;
+  if (!body?.success || !Array.isArray(body.data)) {
+    throw new Error("Unexpected response from the products API");
   }
-
-  return buildLocalFallback({ page, limit, category, brand, search });
-};
-
-/**
- * Filter & paginate local products as a fallback when API is empty.
- */
-const buildLocalFallback = ({ page, limit, category, brand, search }) => {
-  let filtered = localProducts;
-  if (category) filtered = filtered.filter((p) => p.category === category);
-  if (brand) filtered = filtered.filter((p) => p.brand === brand);
-  if (search) {
-    const q = search.toLowerCase();
-    filtered = filtered.filter(
-      (p) =>
-        p.name?.toLowerCase().includes(q) ||
-        p.nameAr?.includes(search) ||
-        p.description?.toLowerCase().includes(q)
-    );
-  }
-  const total = filtered.length;
-  const pages = Math.ceil(total / limit);
-  const start = (page - 1) * limit;
-  const data = filtered.slice(start, start + limit).map((p) => ({
-    ...p,
-    // Normalise local fields to match API shape
-    imageUrl: p.image,
-    isAvailable: p.inStock !== false,
-  }));
-  return {
-    data,
-    pagination: {
-      total,
-      page,
-      pages,
-      limit,
-      next: page < pages ? page + 1 : null,
-      prev: page > 1 ? page - 1 : null,
-    },
-  };
+  return { data: body.data, pagination: body.pagination || null };
 };
 
 /**
