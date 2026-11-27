@@ -6,10 +6,31 @@ import { useToast } from "../../context/ToastContext";
 import { Mail, Truck, ShieldCheck, RotateCcw, Headphones, Phone, MapPin } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import logoImg from "../../assets/logo-transparent.png";
+import { sourceLink } from "../common/SourceRequest";
 import { FREE_SHIPPING_MIN } from "../../utils/shipping";
 
 // Social links: add real URLs here and the icons appear. Empty = hidden.
 const SOCIAL = { facebook: "", instagram: "", tiktok: "" };
+
+const FooterSource = ({ isRtl }) => (
+  <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <p className="font-black text-white">{isRtl ? "مش لاقي منتج؟" : "Can't find a product?"}</p>
+      <p className="text-sm font-medium text-emerald-100/80">
+        {isRtl ? "ابعتلنا اسمه على واتساب ونجيبهولك." : "WhatsApp us its name and we will get it for you."}
+      </p>
+    </div>
+    <a
+      href={sourceLink()}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-black text-emerald-950 active:scale-95"
+    >
+      <FaWhatsapp size={16} />
+      {isRtl ? "اطلبه على واتساب" : "Request on WhatsApp"}
+    </a>
+  </div>
+);
 
 const Footer = () => {
   const { language } = useLanguage();
@@ -131,6 +152,11 @@ const Footer = () => {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Product sourcing request */}
+        <div className="mb-8 rounded-2xl bg-white/8 ring-1 ring-white/10 text-emerald-50">
+          <FooterSource isRtl={isRtl} />
         </div>
 
         {/* Newsletter */}
