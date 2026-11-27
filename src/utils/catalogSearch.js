@@ -64,6 +64,7 @@ export function buildEntry(p) {
     n: norm(p.name),
     b: norm(p.brand),
     rest: norm([p.brand, p.category, (p.description || "").slice(0, 300)].join(" ")),
+    c: norm(p.category),
   };
 }
 
@@ -174,6 +175,16 @@ export function editDistance(a, b) {
   return d[m][n];
 }
 
+// A word that names a product type: items in that department rank first,
+// items that only mention the word in their name/description rank low.
+const CONCEPTS = [
+  { words: ["فيتامين", "فيتامينات", "vitamin", "vitamins", "مكمل", "مكملات", "supplement", "supplements"], cat: /فيتامين|مكمل|vitamin|supplement|تغذيه/ },
+  { words: ["بروتين", "protein", "كرياتين", "creatine"], cat: /تغذيه الرياضيه|رياض|sport/ },
+];
+function conceptFor(tokens) {
+  return CONCEPTS.find((c) => tokens.some((t) => c.words.includes(t))) || null;
+}
+
 export function searchIndex(index, query, limit = 6) {
   const pat = vitaminPattern(query);
   if (pat) {
@@ -187,14 +198,17 @@ export function searchIndex(index, query, limit = 6) {
   if (!variants.length) return { items: [], approx: false };
   const hits = [];
   for (const p of index) {
-    let best = -1;
+    let best = -Infinity;
     for (const tokens of variants) {
       if (!tokens.every((t) => p.n.includes(t) || inRest(p.rest, t))) continue;
       const inName = tokens.every((t) => p.n.includes(t));
       const starts = tokens.some((t) => p.n.split(/[\s-]+/).some((w) => w.startsWith(t)));
-      best = Math.max(best, (inName ? 4 : 0) + (starts ? 2 : 0) + (p.out ? 0 : 1));
+      let sc = (inName ? 4 : 0) + (starts ? 2 : 0) + (p.out ? 0 : 1);
+      const concept = conceptFor(tokens);
+      if (concept) sc += concept.cat.test(p.c || "") ? 20 : -10;
+      best = Math.max(best, sc);
     }
-    if (best >= 0) hits.push({ p, score: best });
+    if (best !== -Infinity) hits.push({ p, score: best });
   }
   if (hits.length) {
     hits.sort((x, y) => y.score - x.score);
