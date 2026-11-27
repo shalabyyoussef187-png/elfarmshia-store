@@ -15,6 +15,7 @@ import Footer from "./components/layout/Footer";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
 import Browse from "./pages/Browse";
+import FreeShippingBar from "./components/common/FreeShippingBar";
 import CategoryPage from "./pages/CategoryPage";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
@@ -41,8 +42,9 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
+      {!isAuthPage && <FreeShippingBar />}
       {!isAuthPage && <Navbar />}
-      <main className="flex-1 pt-24">
+      <main className={`flex-1 ${isAuthPage ? "pt-24" : "pt-32"}`}>
         <PageTransition>
           <Routes>
             <Route path="/" element={<Home />} />
