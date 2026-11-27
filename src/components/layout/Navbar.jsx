@@ -215,8 +215,8 @@ const Navbar = () => {
       )}
 
       <div
-        className={`fixed inset-y-0 right-0 w-full max-w-sm bg-white/95 backdrop-blur-2xl shadow-2xl transform transition-transform duration-300 ease-out z-50 lg:hidden ${
-          isMenuOpen ? "translate-x-0" : "translate-x-full"
+        className={`fixed inset-y-0 right-0 w-full max-w-sm bg-white/95 backdrop-blur-2xl transform transition-transform duration-300 ease-out z-50 lg:hidden ${
+          isMenuOpen ? "translate-x-0 shadow-2xl" : "translate-x-full shadow-none"
         }`}
         dir={language === "ar" ? "rtl" : "ltr"}
       >
