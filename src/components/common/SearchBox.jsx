@@ -1,3 +1,4 @@
+import SourceRequest from "./SourceRequest";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -227,7 +228,14 @@ export default function SearchBox({
           } bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden flex flex-col`}
         >
           {items.length === 0 ? (
-            <p className="px-4 py-3 text-sm text-gray-500">{loading ? L.loading : L.none}</p>
+            loading ? (
+            <p className="px-4 py-3 text-sm text-gray-500">{L.loading}</p>
+          ) : (
+            <>
+              <p className="px-4 pt-3 text-sm text-gray-500">{L.none}</p>
+              <SourceRequest language={language} product={q.trim()} variant="inline" />
+            </>
+          )
           ) : (
             <>
               {approx && <p className="px-4 pt-3 text-xs text-gray-400">{L.close}</p>}

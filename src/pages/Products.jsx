@@ -17,6 +17,7 @@ import {
   Filter,
 } from "lucide-react";
 import { useProducts } from "../hooks/useProducts";
+import SourceRequest from "../components/common/SourceRequest";
 import ProductCard from "../components/common/ProductCard";
 import { fetchProducts } from "../services/api/products";
 
@@ -475,6 +476,7 @@ const Products = () => {
                 <button onClick={clearFilters} className="px-6 py-2.5 bg-teal-600 text-white font-bold text-xs rounded-full">
                   {isRtl ? "مسح جميع الفلاتر" : "Clear All Filters"}
                 </button>
+                <SourceRequest language={language} product={search} variant="card" />
               </div>
             )}
 

@@ -3,23 +3,39 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import { useToast } from "../../context/ToastContext";
-import {
-  Mail,
-  Truck,
-  ShieldCheck,
-  RotateCcw,
-  Headphones,
-  ArrowRight,
-  ArrowLeft,
-} from "lucide-react";
-import { FaFacebook, FaInstagram, FaWhatsapp, FaTiktok } from "react-icons/fa";
+import { Mail, Truck, ShieldCheck, RotateCcw, Headphones, Phone, MapPin } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import logoImg from "../../assets/logo-transparent.png";
+import { sourceLink } from "../common/SourceRequest";
+import { FREE_SHIPPING_MIN } from "../../utils/shipping";
+
+// Social links: add real URLs here and the icons appear. Empty = hidden.
+const SOCIAL = { facebook: "", instagram: "", tiktok: "" };
+
+const FooterSource = ({ isRtl }) => (
+  <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <p className="font-black text-white">{isRtl ? "مش لاقي منتج؟" : "Can't find a product?"}</p>
+      <p className="text-sm font-medium text-emerald-100/80">
+        {isRtl ? "ابعتلنا اسمه على واتساب ونجيبهولك." : "WhatsApp us its name and we will get it for you."}
+      </p>
+    </div>
+    <a
+      href={sourceLink()}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-black text-emerald-950 active:scale-95"
+    >
+      <FaWhatsapp size={16} />
+      {isRtl ? "اطلبه على واتساب" : "Request on WhatsApp"}
+    </a>
+  </div>
+);
 
 const Footer = () => {
   const { language } = useLanguage();
   const isRtl = language === "ar";
   const { success } = useToast();
-  const currentYear = new Date().getFullYear();
   const [emailInput, setEmailInput] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
@@ -27,230 +43,154 @@ const Footer = () => {
     e.preventDefault();
     if (!emailInput.trim()) return;
     setSubscribed(true);
-    success(isRtl ? "تم الاشتراك في النشرة البريدية بنجاح!" : "Subscribed to newsletter successfully!");
+    success(isRtl ? "تم الاشتراك بنجاح!" : "Subscribed successfully!");
     setEmailInput("");
   };
 
-  const footerLinks = {
-    company: {
-      title: isRtl ? "عن الفرماشية" : "Company",
+  const cols = [
+    {
+      title: isRtl ? "تسوق" : "Shop",
       links: [
-        { name: isRtl ? "من نحن" : "About Us", path: "/about" },
-        { name: isRtl ? "تواصل معنا" : "Contact Us", path: "/contact" },
-        { name: isRtl ? "فروع الصيدلية" : "Pharmacies & Branches", path: "/pharmacies" },
-        { name: isRtl ? "الوظائف" : "Careers", path: "/careers" },
-        { name: isRtl ? "مدونة الصحة" : "Health Blog", path: "/blog" },
+        { name: isRtl ? "كل الأقسام" : "All categories", path: "/browse" },
+        { name: isRtl ? "العروض" : "Offers", path: "/offers" },
+        { name: isRtl ? "المفضلة" : "Wishlist", path: "/wishlist" },
+        { name: isRtl ? "السلة" : "Cart", path: "/cart" },
       ],
     },
-    help: {
-      title: isRtl ? "خدمة العملاء" : "Customer Care",
+    {
+      title: isRtl ? "خدمة العملاء" : "Customer care",
       links: [
+        { name: isRtl ? "سياسة الشحن والتوصيل" : "Shipping & delivery", path: "/shipping" },
+        { name: isRtl ? "الإرجاع والاستبدال" : "Returns & refunds", path: "/returns" },
         { name: isRtl ? "الأسئلة الشائعة" : "FAQ", path: "/faq" },
-        { name: isRtl ? "سياسة الشحن والتوصيل" : "Shipping & Delivery", path: "/shipping" },
-        { name: isRtl ? "الإرجاع والاستبدال" : "Returns & Refund", path: "/returns" },
-        { name: isRtl ? "سياسة الخصوصية" : "Privacy Policy", path: "/privacy" },
+        { name: isRtl ? "تواصل معنا" : "Contact us", path: "/contact" },
       ],
     },
-    categories: {
-      title: isRtl ? "أقسام المشتريات" : "Popular Categories",
+    {
+      title: isRtl ? "الفرماشية" : "Al-Farmashia",
       links: [
-        { name: isRtl ? "الفيتامينات والمكملات" : "Vitamins & Supplements", path: "/category/vitamins" },
-        { name: isRtl ? "العناية بالبشرة" : "Skincare", path: "/category/skincare" },
-        { name: isRtl ? "العناية بالطفل" : "Baby Care", path: "/category/babycare" },
-        { name: isRtl ? "العناية الشخصية" : "Personal Care", path: "/category/personalcare" },
+        { name: isRtl ? "من نحن" : "About us", path: "/about" },
+        { name: isRtl ? "فروع الصيدلية" : "Branches", path: "/pharmacies" },
+        { name: isRtl ? "مدونة الصحة" : "Health blog", path: "/blog" },
+        { name: isRtl ? "سياسة الخصوصية" : "Privacy policy", path: "/privacy" },
       ],
     },
-  };
+  ];
+
+  const perks = [
+    { icon: Truck, t: isRtl ? `مجاني فوق ${FREE_SHIPPING_MIN} ج في بورسعيد` : `Free over ${FREE_SHIPPING_MIN} EGP in Port Said` },
+    { icon: ShieldCheck, t: isRtl ? "منتجات أصلية 100%" : "100% authentic" },
+    { icon: RotateCcw, t: isRtl ? "إرجاع واستبدال" : "Easy returns" },
+    { icon: Headphones, t: isRtl ? "دعم صيدلي" : "Pharmacist support" },
+  ];
 
   return (
-    <footer className="bg-[#f4f7f6] text-gray-800 pt-14 pb-8 border-t border-gray-200/80 relative" dir={isRtl ? "rtl" : "ltr"}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* ── 1. STANDALONE NEWSLETTER SECTION (No outer box) ── */}
-        <div className="mb-14 pb-12 border-b border-gray-200">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-            
-            <div className="lg:col-span-6 space-y-2">
-              <span className="inline-block text-[11px] font-extrabold tracking-wider uppercase text-teal-700 bg-teal-50 px-3 py-1 rounded-full border border-teal-200/60">
-                {isRtl ? "النشرة الطبية والعروض" : "HEALTH & OFFERS NEWSLETTER"}
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
-                {isRtl ? "احصل على خصم 10% على أول طلب لك" : "Get 10% Off Your First Order"}
-              </h2>
-              <p className="text-xs sm:text-sm text-gray-600 font-medium leading-relaxed">
-                {isRtl
-                  ? "اشترك في نشرتنا البريدية لتصلك أحدث نصائح الأطباء والعروض الحصرية."
-                  : "Subscribe for expert health guidance and exclusive discount codes directly in your inbox."}
-              </p>
+    <footer className="bg-emerald-950 text-emerald-50" dir={isRtl ? "rtl" : "ltr"}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6">
+        {/* Perks */}
+        <div className="mb-8 grid grid-cols-2 gap-2.5 md:grid-cols-4">
+          {perks.map(({ icon: Icon, t }) => (
+            <div key={t} className="flex items-center gap-2.5 rounded-2xl bg-white/8 px-3 py-3 ring-1 ring-white/10">
+              <Icon size={20} className="shrink-0 text-emerald-300" />
+              <span className="text-xs font-extrabold leading-snug">{t}</span>
             </div>
-
-            <div className="lg:col-span-6">
-              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                  <input
-                    type="email"
-                    required
-                    value={emailInput}
-                    onChange={(e) => setEmailInput(e.target.value)}
-                    placeholder={isRtl ? "أدخل بريدك الإلكتروني..." : "Enter your email address..."}
-                    className="w-full h-12 pl-4 pr-11 py-3 text-xs sm:text-sm text-gray-900 bg-white border border-gray-300 rounded-2xl outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/10 transition-all placeholder-gray-400 shadow-xs font-medium"
-                  />
-                  <Mail size={18} className={`absolute ${isRtl ? "right-4" : "left-4"} top-1/2 -translate-y-1/2 text-gray-400`} />
-                </div>
-
-                <button
-                  type="submit"
-                  className="h-12 px-7 bg-teal-600 hover:bg-teal-700 text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-md shadow-teal-600/20 hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2 shrink-0"
-                >
-                  <span>{subscribed ? (isRtl ? "تم الاشتراك ✓" : "Subscribed ✓") : (isRtl ? "اشترك الآن" : "Subscribe")}</span>
-                  {!subscribed && (isRtl ? <ArrowLeft size={16} strokeWidth={2.5} /> : <ArrowRight size={16} strokeWidth={2.5} />)}
-                </button>
-              </form>
-            </div>
-
-          </div>
+          ))}
         </div>
 
-        {/* ── 2. TRUST BADGES STRIP ── */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-14 pb-10 border-b border-gray-200">
-          <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-white border border-gray-200/70 shadow-xs">
-            <div className="w-11 h-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 shrink-0">
-              <Truck size={20} strokeWidth={2} />
-            </div>
-            <div>
-              <h4 className="text-xs font-extrabold text-gray-900">{isRtl ? "توصيل سريع" : "Fast Shipping"}</h4>
-              <p className="text-[11px] text-gray-500">{isRtl ? "خلال 24-48 ساعة" : "Within 24-48 hours"}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-white border border-gray-200/70 shadow-xs">
-            <div className="w-11 h-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 shrink-0">
-              <ShieldCheck size={20} strokeWidth={2} />
-            </div>
-            <div>
-              <h4 className="text-xs font-extrabold text-gray-900">{isRtl ? "منتجات أصلية 100%" : "100% Authentic"}</h4>
-              <p className="text-[11px] text-gray-500">{isRtl ? "من صيدليات معتمدة" : "Certified Pharmacies"}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-white border border-gray-200/70 shadow-xs">
-            <div className="w-11 h-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 shrink-0">
-              <RotateCcw size={20} strokeWidth={2} />
-            </div>
-            <div>
-              <h4 className="text-xs font-extrabold text-gray-900">{isRtl ? "إرجاع واستبدال سهلا" : "Easy Returns"}</h4>
-              <p className="text-[11px] text-gray-500">{isRtl ? "خلال 14 يوماً" : "Within 14 days"}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-white border border-gray-200/70 shadow-xs">
-            <div className="w-11 h-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 shrink-0">
-              <Headphones size={20} strokeWidth={2} />
-            </div>
-            <div>
-              <h4 className="text-xs font-extrabold text-gray-900">{isRtl ? "دعم صيدلي متواصل" : "Pharmacist Support"}</h4>
-              <p className="text-[11px] text-gray-500">{isRtl ? "طوال أيام الأسبوع" : "7 Days a week"}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* ── 3. MAIN FOOTER LINKS GRID ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
-          
-          {/* Brand Info Column */}
-          <div className="lg:col-span-2 space-y-4">
-            <Link to="/" className="inline-block">
-              <img src={logoImg} alt="Al-Farmashia" className="h-14 w-auto object-contain" />
+        {/* Brand + contact */}
+        <div className="mb-8 grid gap-8 lg:grid-cols-5">
+          <div className="space-y-4 lg:col-span-2">
+            <Link to="/" className="inline-block rounded-2xl bg-white px-3 py-2">
+              <img src={logoImg} alt="Al-Farmashia" className="h-11 w-auto object-contain" />
             </Link>
-
-            <p className="text-xs sm:text-sm text-gray-600 leading-relaxed max-w-sm font-medium">
+            <p className="max-w-sm text-sm font-medium leading-relaxed text-emerald-100/80">
               {isRtl
-                ? "صيدلية الفرماشية هي وجهتك الموثوقة للحصول على جميع الأدوية والمكملات الغذائية ومستحضرات التجميل الأصلية بأسعار متميزة وتوصيل سريع."
-                : "Al-Farmashia is your premier online destination for certified medications, premium vitamins, and skincare products delivered straight to your door."}
+                ? "صيدلية الفرماشية. أدوية ومكملات ومستحضرات أصلية، وتوصيل سريع لباب بيتك في بورسعيد."
+                : "Al-Farmashia pharmacy. Genuine medicines, supplements and care products, delivered fast in Port Said."}
             </p>
-
-            {/* Direct WhatsApp Contact Button */}
-            <div className="pt-1">
+            <div className="flex flex-col gap-2">
               <a
                 href="https://wa.me/201028230225"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-700 font-extrabold text-xs rounded-xl transition-all"
+                className="inline-flex w-fit items-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-black text-emerald-950 active:scale-95"
               >
-                <FaWhatsapp size={16} />
-                <span>{isRtl ? "خدمة العملاء: 01028230225" : "Support: +20 102 823 0225"}</span>
+                <FaWhatsapp size={18} />
+                {isRtl ? "كلمنا على واتساب" : "Chat on WhatsApp"}
               </a>
+              <a href="tel:+201028230225" className="inline-flex items-center gap-2 text-sm font-bold text-emerald-100">
+                <Phone size={15} /> 01028230225
+              </a>
+              <span className="inline-flex items-center gap-2 text-sm font-bold text-emerald-100/80">
+                <MapPin size={15} /> {isRtl ? "بورسعيد، مصر" : "Port Said, Egypt"}
+              </span>
             </div>
-
-            {/* Social Icons */}
-            <div className="flex items-center gap-2.5 pt-2">
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-xl bg-white border border-gray-200 hover:border-teal-500 hover:bg-teal-50 flex items-center justify-center text-gray-600 hover:text-teal-600 transition-all shadow-xs"
-              >
-                <FaFacebook size={16} />
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-xl bg-white border border-gray-200 hover:border-teal-500 hover:bg-teal-50 flex items-center justify-center text-gray-600 hover:text-teal-600 transition-all shadow-xs"
-              >
-                <FaInstagram size={16} />
-              </a>
-              <a
-                href="https://tiktok.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-xl bg-white border border-gray-200 hover:border-teal-500 hover:bg-teal-50 flex items-center justify-center text-gray-600 hover:text-teal-600 transition-all shadow-xs"
-              >
-                <FaTiktok size={16} />
-              </a>
-            </div>
-          </div>
-
-          {/* Dynamic Link Columns */}
-          {Object.values(footerLinks).map((col, idx) => (
-            <div key={idx} className="space-y-3">
-              <h3 className="text-xs font-black text-gray-900 uppercase tracking-wider border-b border-gray-200 pb-2">
-                {col.title}
-              </h3>
-              <ul className="space-y-2">
-                {col.links.map((link, lIdx) => (
-                  <li key={lIdx}>
-                    <Link
-                      to={link.path}
-                      className="text-xs text-gray-600 hover:text-teal-700 transition-colors font-medium flex items-center gap-1.5"
-                    >
-                      <span className="text-teal-600/40">›</span>
-                      <span>{link.name}</span>
-                    </Link>
-                  </li>
+            {(SOCIAL.facebook || SOCIAL.instagram || SOCIAL.tiktok) && (
+              <div className="flex gap-2.5 pt-1">
+                {Object.entries(SOCIAL).filter(([, u]) => u).map(([k, u]) => (
+                  <a key={k} href={u} target="_blank" rel="noopener noreferrer" className="rounded-xl bg-white/10 px-3 py-2 text-xs font-black capitalize">
+                    {k}
+                  </a>
                 ))}
-              </ul>
-            </div>
-          ))}
+              </div>
+            )}
+          </div>
 
-        </div>
-
-        {/* ── 4. BOTTOM COPYRIGHT & PAYMENT BADGES ── */}
-        <div className="pt-6 border-t border-gray-200/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
-          <p className="text-center sm:text-left font-medium">
-            © {currentYear} {isRtl ? "صيدلية الفرماشية +. جميع الحقوق محفوظة." : "Al-Farmashia Pharmacy +. All rights reserved."}
-          </p>
-
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <span className="text-[11px] font-bold text-gray-400">{isRtl ? "وسائل الدفع المقبولة:" : "Accepted Payments:"}</span>
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <PaymentLogos />
-              <span className="px-2 py-1 bg-teal-50 border border-teal-200 text-teal-700 rounded-md text-[10px] font-bold shadow-xs">Vodafone Cash</span>
-              <span className="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-md text-[10px] font-bold shadow-xs">الدفع عند الاستلام</span>
-            </div>
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:col-span-3">
+            {cols.map((c) => (
+              <div key={c.title}>
+                <h3 className="mb-3 text-sm font-black text-white">{c.title}</h3>
+                <ul className="space-y-2.5">
+                  {c.links.map((l) => (
+                    <li key={l.path}>
+                      <Link to={l.path} className="text-sm font-medium text-emerald-100/80 hover:text-white">
+                        {l.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </div>
 
+        {/* Product sourcing request */}
+        <div className="mb-8 rounded-2xl bg-white/8 ring-1 ring-white/10 text-emerald-50">
+          <FooterSource isRtl={isRtl} />
+        </div>
+
+        {/* Newsletter */}
+        <form onSubmit={handleSubscribe} className="mb-8 flex flex-col gap-2.5 rounded-2xl bg-white/8 p-4 ring-1 ring-white/10 sm:flex-row sm:items-center">
+          <span className="text-sm font-extrabold sm:flex-1">
+            {isRtl ? "اشترك لتصلك العروض ونصائح الصيادلة" : "Get offers and pharmacist tips"}
+          </span>
+          <div className="relative sm:w-80">
+            <input
+              type="email"
+              required
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              placeholder={isRtl ? "بريدك الإلكتروني" : "Your email"}
+              className="h-12 w-full rounded-xl bg-white px-4 text-sm font-medium text-gray-900 outline-none"
+            />
+          </div>
+          <button type="submit" className="flex h-12 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 text-sm font-black text-emerald-950 active:scale-95">
+            <Mail size={16} />
+            {subscribed ? (isRtl ? "تم ✓" : "Done ✓") : isRtl ? "اشترك" : "Subscribe"}
+          </button>
+        </form>
+
+        {/* Bottom */}
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-5 text-xs sm:flex-row">
+          <p className="font-medium text-emerald-100/70">
+            © {new Date().getFullYear()} {isRtl ? "صيدلية الفرماشية. جميع الحقوق محفوظة." : "Al-Farmashia Pharmacy. All rights reserved."}
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <PaymentLogos />
+            <span className="rounded-md bg-white px-2 py-1 text-[10px] font-bold text-emerald-900">Vodafone Cash</span>
+            <span className="rounded-md bg-white px-2 py-1 text-[10px] font-bold text-emerald-900">{isRtl ? "الدفع عند الاستلام" : "Cash on delivery"}</span>
+          </div>
+        </div>
       </div>
     </footer>
   );
