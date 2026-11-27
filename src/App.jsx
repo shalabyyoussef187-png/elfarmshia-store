@@ -12,6 +12,7 @@ import PageTransition from "./components/common/PageTransition";
 import Preloader from "./components/common/Preloader";
 import Navbar from "./components/layout/Navbar";
 import Wishlist from "./pages/Wishlist";
+import BlogPost from "./pages/BlogPost";
 import Footer from "./components/layout/Footer";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
@@ -70,6 +71,7 @@ function AppContent() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/careers" element={<Careers />} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
 
             {/* Help Pages */}
             <Route path="/faq" element={<FAQ />} />
