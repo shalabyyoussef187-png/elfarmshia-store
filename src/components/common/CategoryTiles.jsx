@@ -29,13 +29,13 @@ function Collage({ pics, name }) {
   );
 }
 
-export default function CategoryTiles({ nodes, isRtl, countLabel }) {
+export default function CategoryTiles({ nodes, isRtl, countLabel, hrefFor }) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
       {nodes.map((n) => (
         <Link
           key={n.path.join("/")}
-          to={pathToUrl(n.path)}
+          to={hrefFor ? hrefFor(n.path) : pathToUrl(n.path)}
           className="group block rounded-2xl bg-white border border-teal-100 shadow-sm active:scale-[0.98] transition overflow-hidden"
         >
           <div className="aspect-square w-full bg-gradient-to-br from-teal-50 to-emerald-50">
