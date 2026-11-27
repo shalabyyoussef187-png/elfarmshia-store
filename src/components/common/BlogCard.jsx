@@ -1,11 +1,12 @@
 import { Calendar, Clock } from "lucide-react";
+import { Link } from "react-router-dom";
 
-const BlogCard = ({ post, language = "en", clickable = false }) => {
-  const CardWrapper = clickable ? "a" : "div";
+const BlogCard = ({ post, language = "en", clickable = true }) => {
+  const CardWrapper = clickable ? Link : "div";
 
   return (
     <CardWrapper
-      {...(clickable ? { href: `/blog/${post.slug}` } : {})}
+      {...(clickable ? { to: `/blog/${post.slug}` } : {})}
       className={`bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100/50 transition-all duration-500 flex flex-col h-full ${
         clickable
           ? "hover:shadow-xl hover:border-teal-200/50 cursor-pointer group"
