@@ -1,3 +1,4 @@
+import { PLACEHOLDER_IMAGE } from "../utils/placeholder";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -157,7 +158,7 @@ const Cart = () => {
 
                             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-50 border border-gray-100 p-1.5 sm:p-2 shrink-0 overflow-hidden flex items-center justify-center">
                               <img
-                                src={item.image || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop"}
+                                src={item.image || PLACEHOLDER_IMAGE}
                                 alt={item.name}
                                 className="w-full h-full object-contain"
                               />
