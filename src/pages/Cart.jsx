@@ -31,9 +31,7 @@ const Cart = () => {
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [discountAmount, setDiscountAmount] = useState(0);
-  const [shippingCountry, setShippingCountry] = useState(isRtl ? "مصر" : "Egypt");
-  const [shippingZip, setShippingZip] = useState("");
-  const [shippingCost, setShippingCost] = useState(0);
+  const shippingCost = 0;
 
   const handleUpdateQuantity = (item, newQuantity) => {
     if (newQuantity < 1) return;
@@ -67,12 +65,6 @@ const Cart = () => {
     } else {
       warning(isRtl ? "كود الخصم غير صحيح" : "Invalid coupon code");
     }
-  };
-
-  const handleCalculateShipping = (e) => {
-    e.preventDefault();
-    setShippingCost(50);
-    success(isRtl ? "تم حساب تكلفة الشحن: 50 ج.م" : "Shipping rates calculated: 50 EGP");
   };
 
   const finalPrice = Math.max(0, totalPrice - discountAmount + shippingCost);
@@ -285,39 +277,6 @@ const Cart = () => {
                       style={{ width: `${Math.min(100, (totalPrice / FREE_SHIPPING_MIN) * 100)}%` }}
                     />
                   </div>
-                </div>
-
-                {/* Estimate Shipping Accordion / Box */}
-                <div className="mb-6 p-4 rounded-2xl bg-slate-50 border border-gray-100">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Truck size={16} className="text-teal-600" />
-                    <span className="text-xs font-extrabold text-gray-800">
-                      {isRtl ? "تقدير أسعار الشحن:" : "Estimate Shipping Rates:"}
-                    </span>
-                  </div>
-
-                  <form onSubmit={handleCalculateShipping} className="space-y-2">
-                    <input
-                      type="text"
-                      value={shippingCountry}
-                      onChange={(e) => setShippingCountry(e.target.value)}
-                      placeholder={isRtl ? "الدولة" : "Country"}
-                      className="w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-xl outline-none focus:border-teal-400"
-                    />
-                    <input
-                      type="text"
-                      value={shippingZip}
-                      onChange={(e) => setShippingZip(e.target.value)}
-                      placeholder={isRtl ? "الرمز البريدي / المدينة" : "City / Zip Code"}
-                      className="w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-xl outline-none focus:border-teal-400"
-                    />
-                    <button
-                      type="submit"
-                      className="w-full py-2 bg-emerald-800 hover:bg-emerald-900 text-white font-extrabold text-[11px] uppercase tracking-wider rounded-xl transition-all cursor-pointer"
-                    >
-                      {isRtl ? "حساب تكلفة الشحن" : "Calculate Shipping Rates"}
-                    </button>
-                  </form>
                 </div>
 
                 {/* Coupon Code Section */}
