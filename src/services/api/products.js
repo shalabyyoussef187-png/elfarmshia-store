@@ -72,9 +72,9 @@ let catalogPromise = null;
 export const loadCatalog = () => {
   if (!catalogPromise) {
     catalogPromise = (async () => {
-      // One big request (the API accepts limit=400: ~0.5s instead of 7 sequential pages ~2.5s).
+      // One big request (the API accepts limit=2000: one request for the whole catalog).
       // If the catalog ever outgrows it, the remaining pages are fetched after.
-      const LIMIT = 400;
+      const LIMIT = 2000;
       const first = await axios.get(`${API_BASE_URL}/products`, { params: { page: 1, limit: LIMIT } });
       const out = [...(first.data?.data || [])];
       const pages = first.data?.pagination?.pages || 1;
