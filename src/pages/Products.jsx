@@ -66,22 +66,40 @@ const Products = () => {
     [all]
   );
 
-  // Only accept a category that exists in the catalog.
+  // Only accept a category that exists in the catalog. A bare sub-category name
+  // (e.g. from an old link) is resolved to its full path.
   const cat = useMemo(() => {
     if (!catParam || !all) return "";
-    const ok = all.some((p) => p.category === catParam || (p.category || "").startsWith(catParam + SEP));
-    return ok ? catParam : "";
+    if (all.some((p) => p.category === catParam || (p.category || "").startsWith(catParam + SEP))) return catParam;
+    for (const p of all) {
+      const parts = (p.category || "").split(SEP);
+      const i = parts.indexOf(catParam);
+      if (i > 0) return parts.slice(0, i + 1).join(SEP);
+    }
+    return "";
   }, [catParam, all]);
   const catPath = cat ? cat.split(SEP) : [];
   const catNode = tree && catPath.length ? findNode(tree, catPath) : null;
 
-  // Step 1: search + category (the base set, used for the filter option counts).
-  const base = useMemo(() => {
+  // Step 1: search (all departments), then the chosen category.
+  const searched = useMemo(() => {
     if (!all) return [];
-    let list = q ? searchIndex(entries, q, Infinity).items.map((e) => e.raw) : all;
-    if (cat) list = list.filter((p) => p.category === cat || (p.category || "").startsWith(cat + SEP));
+    const list = q ? searchIndex(entries, q, Infinity).items.map((e) => e.raw) : all;
     return list.map(transformProduct);
-  }, [all, entries, q, cat]);
+  }, [all, entries, q]);
+  const inCat = (p) => !cat || p.category === cat || (p.category || "").startsWith(cat + SEP);
+  const base = useMemo(() => searched.filter(inCat), [searched, cat]);
+  // Departments in the search results, for the "search in" scope chips.
+  const scopes = useMemo(() => {
+    if (!q) return [];
+    const m = new Map();
+    searched.forEach((p) => {
+      const top = (p.category || "").split(SEP)[0];
+      if (top) m.set(top, (m.get(top) || 0) + 1);
+    });
+    return [...m.entries()].sort((a, b) => b[1] - a[1]);
+  }, [searched, q]);
+  const topCat = catPath[0] || "";
 
   const brands = useMemo(() => {
     const m = new Map();
@@ -473,6 +491,27 @@ const Products = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Search scope: which department the results come from */}
+              {q && scopes.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  <Link
+                    to={"/products?search=" + encodeURIComponent(q)}
+                    className={`shrink-0 px-3.5 py-2 rounded-full border text-xs font-extrabold ${!topCat ? "bg-teal-600 border-teal-600 text-white" : "bg-white border-gray-200 text-gray-700 hover:border-teal-300"}`}
+                  >
+                    {isRtl ? "كل الأقسام" : "All"} ({searched.length})
+                  </Link>
+                  {scopes.map(([name, n]) => (
+                    <Link
+                      key={name}
+                      to={"/products?search=" + encodeURIComponent(q) + "&category=" + encodeURIComponent(name)}
+                      className={`shrink-0 px-3.5 py-2 rounded-full border text-xs font-extrabold ${topCat === name ? "bg-teal-600 border-teal-600 text-white" : "bg-white border-gray-200 text-gray-700 hover:border-teal-300"}`}
+                    >
+                      {name} ({n})
+                    </Link>
+                  ))}
+                </div>
+              )}
 
               {/* Sub-category chips */}
               {catNode?.children?.length > 0 && (
