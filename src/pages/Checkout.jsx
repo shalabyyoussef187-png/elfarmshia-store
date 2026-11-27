@@ -1,3 +1,4 @@
+import { PLACEHOLDER_IMAGE } from "../utils/placeholder";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -509,7 +510,7 @@ const Checkout = () => {
                     <div key={item.id} className="flex gap-3">
                       <div className="w-16 h-16 rounded-lg bg-gray-100 overflow-hidden shrink-0">
                         <img
-                          src={item.image || "https:" + "//images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=100"}
+                          src={item.image || PLACEHOLDER_IMAGE}
                           alt={item.name}
                           className="w-full h-full object-contain p-1"
                         />
