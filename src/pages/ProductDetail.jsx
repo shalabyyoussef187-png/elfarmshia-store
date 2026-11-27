@@ -1,3 +1,4 @@
+import { PLACEHOLDER_IMAGE } from "../utils/placeholder";
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import { useCart } from "../context/CartContext";
@@ -16,8 +17,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=80";
+const FALLBACK_IMAGE = PLACEHOLDER_IMAGE;
 
 /* ─── Simple titled section ─── */
 const InfoSection = ({ title, content }) => {
