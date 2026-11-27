@@ -52,9 +52,14 @@ export default function ScrollToTop() {
       return;
     }
 
-    // Show the top while the page loads (a short loading page must not show the footer),
-    // then go back to the saved spot once the page is tall enough.
-    window.scrollTo(0, 0);
+    // Keep the page tall while it loads, so a short loading page never shows the footer
+    // (the browser would otherwise clamp us to the bottom). Then settle on the saved spot.
+    const root = document.getElementById("root");
+    const release = () => {
+      document.body.style.minHeight = "";
+    };
+    document.body.style.minHeight = `${target + window.innerHeight}px`;
+    window.scrollTo(0, target);
     let stopped = false;
     const stop = () => {
       stopped = true;
@@ -66,22 +71,28 @@ export default function ScrollToTop() {
     const timer = setInterval(() => {
       if (stopped || Date.now() - started > 6000) {
         clearInterval(timer);
+        release();
         return;
       }
-      const tallEnough =
-        document.documentElement.scrollHeight >= target + window.innerHeight;
+      const tallEnough = (root ? root.offsetHeight : 0) >= target + window.innerHeight;
       if (tallEnough) {
         window.scrollTo(0, target);
         if (Math.abs(window.scrollY - target) < 2) {
           settled += 1;
-          if (settled >= 5) clearInterval(timer);
+          if (settled >= 5) {
+            clearInterval(timer);
+            release();
+          }
         } else {
           settled = 0;
         }
+      } else {
+        window.scrollTo(0, target);
       }
     }, 60);
     return () => {
       clearInterval(timer);
+      release();
       window.removeEventListener("wheel", stop);
       window.removeEventListener("touchstart", stop);
     };
