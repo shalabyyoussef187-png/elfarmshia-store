@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Check,
 } from "lucide-react";
+import { FREE_SHIPPING_MIN } from "../utils/shipping";
 import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 
@@ -30,9 +31,7 @@ const Cart = () => {
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [discountAmount, setDiscountAmount] = useState(0);
-  const [shippingCountry, setShippingCountry] = useState(isRtl ? "مصر" : "Egypt");
-  const [shippingZip, setShippingZip] = useState("");
-  const [shippingCost, setShippingCost] = useState(0);
+  const shippingCost = 0;
 
   const handleUpdateQuantity = (item, newQuantity) => {
     if (newQuantity < 1) return;
@@ -66,12 +65,6 @@ const Cart = () => {
     } else {
       warning(isRtl ? "كود الخصم غير صحيح" : "Invalid coupon code");
     }
-  };
-
-  const handleCalculateShipping = (e) => {
-    e.preventDefault();
-    setShippingCost(50);
-    success(isRtl ? "تم حساب تكلفة الشحن: 50 ج.م" : "Shipping rates calculated: 50 EGP");
   };
 
   const finalPrice = Math.max(0, totalPrice - discountAmount + shippingCost);
@@ -267,37 +260,23 @@ const Cart = () => {
                   </span>
                 </div>
 
-                {/* Estimate Shipping Accordion / Box */}
-                <div className="mb-6 p-4 rounded-2xl bg-slate-50 border border-gray-100">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Truck size={16} className="text-teal-600" />
-                    <span className="text-xs font-extrabold text-gray-800">
-                      {isRtl ? "تقدير أسعار الشحن:" : "Estimate Shipping Rates:"}
-                    </span>
+                {/* Free delivery in Port Said over 300 EGP */}
+                <div className="mb-4 p-3 rounded-2xl bg-emerald-50 border border-emerald-100">
+                  <p className="text-xs font-extrabold text-emerald-900 mb-2">
+                    {totalPrice >= FREE_SHIPPING_MIN
+                      ? isRtl
+                        ? "مبروك! التوصيل مجاني داخل بورسعيد"
+                        : "Free delivery in Port Said unlocked"
+                      : isRtl
+                        ? `فاضلك ${Math.ceil(FREE_SHIPPING_MIN - totalPrice)} ج ويبقى التوصيل مجاني داخل بورسعيد`
+                        : `Add ${Math.ceil(FREE_SHIPPING_MIN - totalPrice)} EGP more for free delivery in Port Said`}
+                  </p>
+                  <div className="h-2 rounded-full bg-emerald-100 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-emerald-600 transition-all"
+                      style={{ width: `${Math.min(100, (totalPrice / FREE_SHIPPING_MIN) * 100)}%` }}
+                    />
                   </div>
-
-                  <form onSubmit={handleCalculateShipping} className="space-y-2">
-                    <input
-                      type="text"
-                      value={shippingCountry}
-                      onChange={(e) => setShippingCountry(e.target.value)}
-                      placeholder={isRtl ? "الدولة" : "Country"}
-                      className="w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-xl outline-none focus:border-teal-400"
-                    />
-                    <input
-                      type="text"
-                      value={shippingZip}
-                      onChange={(e) => setShippingZip(e.target.value)}
-                      placeholder={isRtl ? "الرمز البريدي / المدينة" : "City / Zip Code"}
-                      className="w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-xl outline-none focus:border-teal-400"
-                    />
-                    <button
-                      type="submit"
-                      className="w-full py-2 bg-emerald-800 hover:bg-emerald-900 text-white font-extrabold text-[11px] uppercase tracking-wider rounded-xl transition-all cursor-pointer"
-                    >
-                      {isRtl ? "حساب تكلفة الشحن" : "Calculate Shipping Rates"}
-                    </button>
-                  </form>
                 </div>
 
                 {/* Coupon Code Section */}

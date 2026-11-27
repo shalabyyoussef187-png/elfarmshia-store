@@ -6,7 +6,7 @@ export default function CategoryHome({ language = "en" }) {
   const { tree } = useCategoryTree();
   const countLabel = (n) => (isRtl ? `${n} منتج` : `${n} items`);
   return (
-    <section className="pt-28 pb-8 bg-[#f8faf9]" dir={isRtl ? "rtl" : "ltr"}>
+    <section className="pt-36 pb-8 bg-[#f8faf9]" dir={isRtl ? "rtl" : "ltr"}>
       <div className="max-w-7xl mx-auto px-4">
         <h2 className="text-xl font-extrabold text-emerald-950 mb-4">
           {isRtl ? "تسوق حسب القسم" : "Shop by category"}

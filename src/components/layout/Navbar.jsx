@@ -79,7 +79,7 @@ const Navbar = () => {
   return (
     <>
       {/* Floating Island Glass Capsule Navbar — Perfectly Aligned to Logo */}
-      <header className="fixed top-4 sm:top-5 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-6xl transition-all duration-500">
+      <header className="fixed top-9 sm:top-10 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-6xl transition-all duration-500">
         <nav
           className={`relative rounded-full transition-all duration-500 px-5 sm:px-7 py-2.5 sm:py-3 shadow-2xl flex items-center justify-between border ${
             scrolled
