@@ -10,10 +10,10 @@ const PurposeChips = ({ language }) => {
   const { count } = useWishlist();
   const chips = [
     { icon: Percent, label: isRtl ? "عروض النهاردة" : "Today's offers", to: "/offers" },
-    { icon: Baby, label: isRtl ? "للأطفال" : "For kids", to: "/products?search=" + encodeURIComponent("أطفال") },
-    { icon: Sparkles, label: isRtl ? "للبشرة الحساسة" : "Sensitive skin", to: "/products?search=" + encodeURIComponent("حساسة") },
-    { icon: Pill, label: isRtl ? "فيتامينات" : "Vitamins", to: "/products?search=" + encodeURIComponent("فيتامين") },
-    { icon: Dumbbell, label: isRtl ? "تغذية رياضية" : "Sports nutrition", to: "/products?search=" + encodeURIComponent("كرياتين") },
+    { icon: Baby, label: isRtl ? "للأطفال" : "For kids", to: "/products?category=" + encodeURIComponent("الأم والطفل") },
+    { icon: Sparkles, label: isRtl ? "للبشرة الحساسة" : "Sensitive skin", to: "/products?category=" + encodeURIComponent("العناية بالبشرة") + "&search=" + encodeURIComponent("حساسة") },
+    { icon: Pill, label: isRtl ? "فيتامينات" : "Vitamins", to: "/products?category=" + encodeURIComponent("الفيتامينات والمكملات") },
+    { icon: Dumbbell, label: isRtl ? "تغذية رياضية" : "Sports nutrition", to: "/products?category=" + encodeURIComponent("التغذية الرياضية") },
     { icon: FileText, label: isRtl ? "عندي روشتة" : "I have a prescription", href: WA },
     { icon: Heart, label: (isRtl ? "المفضلة" : "Wishlist") + (count ? ` (${count})` : ""), to: "/wishlist" },
   ];
