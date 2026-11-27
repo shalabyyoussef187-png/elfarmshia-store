@@ -5,22 +5,22 @@ const Shipping = () => {
     {
       area: "Port Said",
       timeline: "Same-day or Next-day",
-      fee: "Free on orders over 200 EGP",
+      fee: "Free delivery on orders over 300 EGP",
     },
     {
       area: "Cairo, Alexandria, Giza",
       timeline: "1-2 business days",
-      fee: "Free on orders over 200 EGP",
+      fee: "Shipping fee confirmed at order",
     },
     {
       area: "Delta Cities",
       timeline: "2-3 business days",
-      fee: "Free on orders over 200 EGP",
+      fee: "Shipping fee confirmed at order",
     },
     {
       area: "Upper Egypt",
       timeline: "3-4 business days",
-      fee: "Free on orders over 200 EGP",
+      fee: "Shipping fee confirmed at order",
     },
   ];
 
