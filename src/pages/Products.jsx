@@ -49,7 +49,15 @@ const Products = () => {
   // Coming back to a list: start at the top while it loads, so a short loading
   // page never shows the footer.
   useLayoutEffect(() => {
-    if (pendingY.current > 0) window.scrollTo(0, 0);
+    const y = pendingY.current;
+    if (y > 0) {
+      // Keep the page tall so the loading list never shows the footer.
+      document.body.style.minHeight = `${y + window.innerHeight}px`;
+      window.scrollTo(0, y);
+    }
+    return () => {
+      document.body.style.minHeight = "";
+    };
   }, []);
   const skipPageReset = useRef(saved.current.page > 1);
 
@@ -118,6 +126,9 @@ const Products = () => {
     const y = pendingY.current;
     pendingY.current = 0;
     requestAnimationFrame(() => window.scrollTo(0, y));
+    setTimeout(() => {
+      document.body.style.minHeight = "";
+    }, 500);
   }, [loading, products]);
 
   // Extract unique categories & brands from backend
