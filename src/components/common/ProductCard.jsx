@@ -12,7 +12,7 @@ const FALLBACK_IMAGE =
  * Pristine Light Luxury Glass Product Card
  * Exact layout from the reference image, rendered in a crisp, ultra-clean light aesthetic!
  */
-const ProductCard = ({ product, language = "en" }) => {
+const ProductCard = ({ product, language = "en", layout = "grid" }) => {
   const { addToCart, isInCart, getItemQuantity, updateQuantity } = useCart();
   const { success } = useToast();
   const wishlist = useWishlist();
@@ -47,16 +47,17 @@ const ProductCard = ({ product, language = "en" }) => {
     );
   };
 
+  const isList = layout === "list";
   return (
     <Link
       to={`/product/${productId}`}
-      className="group relative flex flex-col h-full rounded-3xl p-4
+      className={`group relative flex ${isList ? "flex-row gap-3 items-stretch" : "flex-col h-full"} rounded-3xl p-4
         bg-white border border-gray-100/90
         shadow-sm hover:shadow-xl hover:shadow-teal-950/8
-        hover:border-teal-300 hover:-translate-y-1.5 transition-all duration-400 overflow-hidden cursor-pointer"
+        hover:border-teal-300 hover:-translate-y-1.5 transition-all duration-400 overflow-hidden cursor-pointer`}
     >
       {/* ── Inner Light Viewport for Product Image ── */}
-      <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-gradient-to-b from-slate-50/90 via-teal-50/20 to-slate-50 p-5 flex items-center justify-center border border-slate-100">
+      <div className={`relative aspect-square ${isList ? "w-28 sm:w-40 shrink-0 self-start" : "w-full"} rounded-2xl overflow-hidden bg-gradient-to-b from-slate-50/90 via-teal-50/20 to-slate-50 ${isList ? "p-2" : "p-5"} flex items-center justify-center border border-slate-100`}>
         {/* Wishlist Heart Button */}
         <button
           onClick={toggleWishlist}
@@ -108,7 +109,7 @@ const ProductCard = ({ product, language = "en" }) => {
       </div>
 
       {/* ── Card Content Area ── */}
-      <div className="flex flex-col flex-1 pt-4 px-1 pb-1">
+      <div className={`flex flex-col flex-1 min-w-0 ${isList ? "pt-0" : "pt-4"} px-1 pb-1`}>
         {inStock && (
           <span className="mb-1.5 inline-flex w-fit items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-extrabold text-emerald-700">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -117,7 +118,7 @@ const ProductCard = ({ product, language = "en" }) => {
         )}
 
         {/* Product Title in Almarai Font */}
-        <h3 className="text-lg font-extrabold text-gray-900 mb-1 line-clamp-1 leading-snug tracking-tight group-hover:text-teal-700 transition-colors">
+        <h3 className={`text-lg font-extrabold text-gray-900 mb-1 ${isList ? "line-clamp-2 text-base" : "line-clamp-1"} leading-snug tracking-tight group-hover:text-teal-700 transition-colors`}>
           {product.name}
         </h3>
 
