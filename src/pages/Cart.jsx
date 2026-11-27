@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Check,
 } from "lucide-react";
+import { FREE_SHIPPING_MIN } from "../utils/shipping";
 import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 
@@ -265,6 +266,25 @@ const Cart = () => {
                   <span className="text-base font-black text-emerald-950">
                     {totalPrice.toFixed(0)} {isRtl ? "ج.م" : "EGP"}
                   </span>
+                </div>
+
+                {/* Free delivery in Port Said over 300 EGP */}
+                <div className="mb-4 p-3 rounded-2xl bg-emerald-50 border border-emerald-100">
+                  <p className="text-xs font-extrabold text-emerald-900 mb-2">
+                    {totalPrice >= FREE_SHIPPING_MIN
+                      ? isRtl
+                        ? "مبروك! التوصيل مجاني داخل بورسعيد"
+                        : "Free delivery in Port Said unlocked"
+                      : isRtl
+                        ? `فاضلك ${Math.ceil(FREE_SHIPPING_MIN - totalPrice)} ج ويبقى التوصيل مجاني داخل بورسعيد`
+                        : `Add ${Math.ceil(FREE_SHIPPING_MIN - totalPrice)} EGP more for free delivery in Port Said`}
+                  </p>
+                  <div className="h-2 rounded-full bg-emerald-100 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-emerald-600 transition-all"
+                      style={{ width: `${Math.min(100, (totalPrice / FREE_SHIPPING_MIN) * 100)}%` }}
+                    />
+                  </div>
                 </div>
 
                 {/* Estimate Shipping Accordion / Box */}
