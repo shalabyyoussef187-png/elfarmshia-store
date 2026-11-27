@@ -1,3 +1,5 @@
+import { PLACEHOLDER_IMAGE } from "./placeholder";
+
 /**
  * ImageKit.io Image Transformation Utilities
  * Documentation: https://docs.imagekit.io/features/image-transformations
@@ -10,7 +12,7 @@
  */
 export const getImageUrl = (image) => {
   if (!image) {
-    return "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop";
+    return PLACEHOLDER_IMAGE;
   }
 
   // If image is an object with url property
@@ -24,7 +26,7 @@ export const getImageUrl = (image) => {
   }
 
   // Fallback
-  return "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop";
+  return PLACEHOLDER_IMAGE;
 };
 
 /**
