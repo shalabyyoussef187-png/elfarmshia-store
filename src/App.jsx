@@ -18,7 +18,6 @@ import Home from "./pages/Home";
 import Products from "./pages/Products";
 import Browse from "./pages/Browse";
 import FreeShippingBar from "./components/common/FreeShippingBar";
-import CategoryPage from "./pages/CategoryPage";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
