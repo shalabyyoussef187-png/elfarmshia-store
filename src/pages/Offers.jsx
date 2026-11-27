@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import ProductCard from "../components/common/ProductCard";
-import { getDiscountedProducts } from "../data/products";
+import { Link } from "react-router-dom";
+import { loadCatalog, transformProduct } from "../services/api/products";
 import {
   Tag,
   Clock,
@@ -19,48 +20,40 @@ const Offers = () => {
   const { language } = useLanguage();
   const isRtl = language === "ar";
 
-  const allDiscounted = getDiscountedProducts();
+  // Real offers only: API products flagged as an offer with an actual discount.
+  const [all, setAll] = useState(null);
+  const [error, setError] = useState(false);
+  const load = () => {
+    setError(false);
+    loadCatalog().then((raw) => setAll(raw.map(transformProduct))).catch(() => setError(true));
+  };
+  useEffect(load, []);
+  const allDiscounted = (all || []).filter(
+    (p) => p.isOffer && (p.discount > 0 || p.discountAmount > 0 || (p.originalPrice && p.originalPrice > p.price))
+  );
 
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("discount-high");
 
-  /* Flash Sale Countdown Timer (Ticking down to midnight) */
-  const [timeLeft, setTimeLeft] = useState({ hours: 14, minutes: 32, seconds: 45 });
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
-        if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
-        if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        return { hours: 23, minutes: 59, seconds: 59 };
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  /* Categories filter list */
+  /* Categories that really have offers */
+  const topOf = (p) => (p.category || "").split(" - ")[0];
+  const offerDepts = [...new Set(allDiscounted.map(topOf).filter(Boolean))];
   const categories = [
     { id: "all", nameEn: "All Offers", nameAr: "جميع العروض" },
-    { id: "skin-care", nameEn: "Skincare", nameAr: "العناية بالبشرة" },
-    { id: "hair-care", nameEn: "Hair Care", nameAr: "العناية بالشعر" },
-    { id: "vitamins-supplements", nameEn: "Vitamins", nameAr: "الفيتامينات" },
-    { id: "mom-baby", nameEn: "Mom & Baby", nameAr: "الأم والطفل" },
-    { id: "medical-equipment", nameEn: "Equipment", nameAr: "الأجهزة الطبية" },
+    ...offerDepts.map((d) => ({ id: d, nameEn: d, nameAr: d })),
   ];
 
   /* Filter products by selected category */
   const filteredProducts = allDiscounted.filter((item) => {
     if (selectedCategory === "all") return true;
-    return item.category === selectedCategory;
+    return topOf(item) === selectedCategory;
   });
 
   /* Sort products */
   const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortBy === "discount-high") return b.discount - a.discount;
+    if (sortBy === "discount-high") return (b.discount || 0) - (a.discount || 0);
     if (sortBy === "price-low") return a.price - b.price;
     if (sortBy === "price-high") return b.price - a.price;
-    if (sortBy === "rating") return b.rating - a.rating;
     return 0;
   });
 
@@ -77,10 +70,10 @@ const Offers = () => {
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
             
             {/* Banner Left Info */}
-            <div className="lg:col-span-7 space-y-3 text-center lg:text-start">
+            <div className="lg:col-span-12 space-y-3 text-center lg:text-start">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-400/20 border border-amber-300/40 text-amber-300 text-xs font-black uppercase tracking-wider">
                 <Flame size={15} className="animate-pulse text-amber-400" />
-                <span>{isRtl ? "تخفيضات لفترة محدودة" : "LIMITED TIME FLASH DEALS"}</span>
+                <span>{isRtl ? "عروض الصيدلية" : "PHARMACY OFFERS"}</span>
               </div>
 
               <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
@@ -99,42 +92,6 @@ const Offers = () => {
                 <span className="px-3 py-1 bg-white/15 border border-white/30 rounded-xl font-mono text-xs font-black tracking-widest text-amber-300 shadow-xs">
                   PHARMA10
                 </span>
-              </div>
-            </div>
-
-            {/* Banner Right Countdown Timer */}
-            <div className="lg:col-span-5 flex flex-col items-center justify-center bg-white/10 backdrop-blur-xl p-5 sm:p-6 rounded-2xl border border-white/20 shadow-inner">
-              <div className="flex items-center gap-2 mb-3 text-teal-200 text-xs font-extrabold uppercase tracking-wider">
-                <Clock size={16} className="text-amber-400" />
-                <span>{isRtl ? "وينتهي العرض خلال:" : "Offers End In:"}</span>
-              </div>
-
-              {/* Timer Pill Display */}
-              <div className="flex items-center gap-2 sm:gap-3" dir="ltr">
-                <div className="flex flex-col items-center">
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white text-teal-900 font-black text-2xl sm:text-3xl flex items-center justify-center shadow-lg border border-teal-100">
-                    {String(timeLeft.hours).padStart(2, "0")}
-                  </div>
-                  <span className="text-[10px] text-teal-200 font-bold mt-1 uppercase">{isRtl ? "ساعة" : "Hours"}</span>
-                </div>
-
-                <span className="text-2xl font-black text-amber-400 mb-4">:</span>
-
-                <div className="flex flex-col items-center">
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white text-teal-900 font-black text-2xl sm:text-3xl flex items-center justify-center shadow-lg border border-teal-100">
-                    {String(timeLeft.minutes).padStart(2, "0")}
-                  </div>
-                  <span className="text-[10px] text-teal-200 font-bold mt-1 uppercase">{isRtl ? "دقيقة" : "Mins"}</span>
-                </div>
-
-                <span className="text-2xl font-black text-amber-400 mb-4">:</span>
-
-                <div className="flex flex-col items-center">
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-400 text-teal-950 font-black text-2xl sm:text-3xl flex items-center justify-center shadow-lg border border-amber-300">
-                    {String(timeLeft.seconds).padStart(2, "0")}
-                  </div>
-                  <span className="text-[10px] text-teal-200 font-bold mt-1 uppercase">{isRtl ? "ثانية" : "Secs"}</span>
-                </div>
               </div>
             </div>
 
@@ -177,25 +134,35 @@ const Offers = () => {
               <option value="discount-high">{isRtl ? "الأعلى خصماً" : "Highest Discount %"}</option>
               <option value="price-low">{isRtl ? "الأقل سعراً" : "Lowest Price"}</option>
               <option value="price-high">{isRtl ? "الأعلى سعراً" : "Highest Price"}</option>
-              <option value="rating">{isRtl ? "الأعلى تقييماً" : "Top Rated"}</option>
             </select>
           </div>
 
         </div>
 
         {/* ══ 3. PRODUCTS GRID ══ */}
-        {sortedProducts.length === 0 ? (
+        {error ? (
+          <div className="bg-white rounded-3xl p-12 text-center border border-gray-100 my-8">
+            <h3 className="text-lg font-bold text-gray-800">{isRtl ? "تعذر تحميل العروض" : "Could not load offers"}</h3>
+            <button onClick={load} className="mt-4 px-5 py-2.5 bg-teal-600 text-white font-bold text-xs rounded-xl">
+              {isRtl ? "إعادة المحاولة" : "Try Again"}
+            </button>
+          </div>
+        ) : !all ? (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
+            {[1, 2, 3, 4].map((i) => <div key={i} className="h-72 rounded-3xl bg-white border border-gray-100" />)}
+          </div>
+        ) : sortedProducts.length === 0 ? (
           <div className="bg-white rounded-3xl p-12 text-center border border-gray-100 my-8">
             <Percent size={40} className="mx-auto text-gray-300 mb-3" />
             <h3 className="text-lg font-bold text-gray-800">
-              {isRtl ? "لا توجد عروض متوفرة في هذا القسم حالياً" : "No offers available in this category right now"}
+              {isRtl ? "مفيش عروض متاحة حالياً" : "No offers right now"}
             </h3>
-            <button
-              onClick={() => setSelectedCategory("all")}
-              className="mt-4 px-5 py-2.5 bg-teal-600 text-white font-bold text-xs rounded-xl"
-            >
-              {isRtl ? "عرض جميع العروض" : "Show All Offers"}
-            </button>
+            <p className="text-xs text-gray-500 mt-2">
+              {isRtl ? "هنضيف العروض هنا أول ما تنزل. تصفح المنتجات في الوقت الحالي." : "New offers will appear here. Meanwhile, browse the products."}
+            </p>
+            <Link to="/products" className="inline-block mt-4 px-5 py-2.5 bg-teal-600 text-white font-bold text-xs rounded-xl">
+              {isRtl ? "تصفح المنتجات" : "Browse products"}
+            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
