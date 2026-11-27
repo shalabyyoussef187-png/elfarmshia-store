@@ -11,7 +11,6 @@ import ScrollToTop from "./components/common/ScrollToTop";
 import PageTransition from "./components/common/PageTransition";
 import Preloader from "./components/common/Preloader";
 import Navbar from "./components/layout/Navbar";
-import Wishlist from "./pages/Wishlist";
 import BlogPost from "./pages/BlogPost";
 import Footer from "./components/layout/Footer";
 import Home from "./pages/Home";
@@ -58,7 +57,6 @@ function AppContent() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/order-success" element={<OrderSuccess />} />
-            <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/offers" element={<Offers />} />
             <Route path="/pharmacies" element={<Pharmacies />} />
 
