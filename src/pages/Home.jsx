@@ -4,6 +4,7 @@ import { useHomeData } from "../hooks/useHomeData";
 import Hero from "../components/sections/Hero";
 import CategoryHome from "../components/sections/CategoryHome";
 import PurposeChips from "../components/sections/PurposeChips";
+import SourceRequest from "../components/common/SourceRequest";
 import PortSaidCard from "../components/sections/PortSaidCard";
 import ProductsSection from "../components/sections/ProductsSection";
 import HealthNeedsSection from "../components/sections/HealthNeedsSection";
@@ -29,6 +30,7 @@ const Home = () => {
 
       <PurposeChips language={language} />
       <PortSaidCard language={language} />
+      <SourceRequest language={language} variant="banner" />
 
       {/* 2. Hero Section */}
       <Hero language={language} />
