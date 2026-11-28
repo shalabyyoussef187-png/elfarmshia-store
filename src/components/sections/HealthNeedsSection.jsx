@@ -11,79 +11,18 @@ import {
   Pill,
 } from "lucide-react";
 
+// Every card opens a real department that has products (no keyword searches).
+const cat = (...parts) => "/products?category=" + encodeURIComponent(parts.join(" - "));
+
 const HEALTH_NEEDS = [
-  {
-    id: 1,
-    name: "Cold & Flu",
-    nameAr: "نزلات البرد والإنفلونزا",
-    description: "Relief for cold symptoms and flu",
-    descriptionAr: "علاج أعراض البرد والإنفلونزا",
-    icon: Thermometer,
-    link: "/products?search=البرد",
-  },
-  {
-    id: 2,
-    name: "Immunity Boost",
-    nameAr: "تعزيز المناعة",
-    description: "Strengthen your immune system",
-    descriptionAr: "قوّ جهازك المناعي",
-    icon: Shield,
-    link: "/products?category=%D8%A7%D9%84%D9%81%D9%8A%D8%AA%D8%A7%D9%85%D9%8A%D9%86%D8%A7%D8%AA%20%D9%88%D8%A7%D9%84%D9%85%D9%83%D9%85%D9%84%D8%A7%D8%AA&search=%D9%85%D9%86%D8%A7%D8%B9%D8%A9",
-  },
-  {
-    id: 3,
-    name: "Skin Care",
-    nameAr: "العناية بالبشرة",
-    description: "Solutions for healthy, glowing skin",
-    descriptionAr: "حلول للبشرة الصحية المتألقة",
-    icon: Droplets,
-    link: "/products?category=%D8%A7%D9%84%D8%B9%D9%86%D8%A7%D9%8A%D8%A9%20%D8%A8%D8%A7%D9%84%D8%A8%D8%B4%D8%B1%D8%A9",
-  },
-  {
-    id: 4,
-    name: "Respiratory",
-    nameAr: "صحة الجهاز التنفسي",
-    description: "Breathe easier and better",
-    descriptionAr: "تنفس بشكل أفضل وأسهل",
-    icon: Wind,
-    link: "/products?search=تنفسي",
-  },
-  {
-    id: 5,
-    name: "Baby Care",
-    nameAr: "رعاية الطفل",
-    description: "Gentle care for your little ones",
-    descriptionAr: "رعاية لطيفة لأطفالك",
-    icon: Baby,
-    link: "/products?category=%D8%A7%D9%84%D8%A3%D9%85%20%D9%88%D8%A7%D9%84%D8%B7%D9%81%D9%84",
-  },
-  {
-    id: 6,
-    name: "Pain Relief",
-    nameAr: "تخفيف الألم",
-    description: "Fast-acting pain management",
-    descriptionAr: "إدارة الألم سريعة المفعول",
-    icon: Activity,
-    link: "/products?search=ألم",
-  },
-  {
-    id: 7,
-    name: "Heart Health",
-    nameAr: "صحة القلب",
-    description: "Support cardiovascular wellness",
-    descriptionAr: "دعم صحة القلب والأوعية",
-    icon: Heart,
-    link: "/products?search=قلب",
-  },
-  {
-    id: 8,
-    name: "Digestive Health",
-    nameAr: "صحة الجهاز الهضمي",
-    description: "Improve digestive comfort",
-    descriptionAr: "تحسين راحة الجهاز الهضمي",
-    icon: Pill,
-    link: "/products?search=هضمي",
-  },
+  { id: 1, name: "Immunity & Vitamins", nameAr: "المناعة والفيتامينات", description: "Vitamins to support your immunity", descriptionAr: "فيتامينات تقوّي مناعتك", icon: Shield, link: cat("الفيتامينات والمكملات", "فيتامينات") },
+  { id: 2, name: "Fever & Temperature", nameAr: "الحرارة والبرد", description: "Thermometers to check fever at home", descriptionAr: "موازين حرارة لمتابعة السخونية في البيت", icon: Thermometer, link: cat("المستلزمات الطبية", "موازين الحرارة") },
+  { id: 3, name: "Skin Care", nameAr: "العناية بالبشرة", description: "Solutions for healthy, glowing skin", descriptionAr: "حلول للبشرة الصحية المتألقة", icon: Droplets, link: cat("العناية بالبشرة") },
+  { id: 4, name: "Respiratory", nameAr: "صحة الجهاز التنفسي", description: "Inhalers and nebulizers", descriptionAr: "أجهزة الاستنشاق والنيبولايزر", icon: Wind, link: cat("المستلزمات الطبية", "أجهزة الاستنشاق") },
+  { id: 5, name: "Baby Care", nameAr: "رعاية الطفل", description: "Gentle care for your little ones", descriptionAr: "رعاية لطيفة لأطفالك", icon: Baby, link: cat("الأم والطفل") },
+  { id: 6, name: "Joints & Support", nameAr: "العظام والمفاصل", description: "Supports, braces and joint supplements", descriptionAr: "دعامات وأربطة ومكملات للمفاصل", icon: Activity, link: cat("المستلزمات الطبية", "الدعامات والأربطة") },
+  { id: 7, name: "Blood Pressure", nameAr: "ضغط الدم والقلب", description: "Blood pressure monitors", descriptionAr: "أجهزة قياس ضغط الدم", icon: Heart, link: cat("المستلزمات الطبية", "أجهزة قياس ضغط الدم") },
+  { id: 8, name: "Medicines & Treatments", nameAr: "الأدوية والعلاجات", description: "Treatments and medicines", descriptionAr: "علاجات وأدوية", icon: Pill, link: cat("الأدوية والعلاجات") },
 ];
 
 const HealthNeedsSection = ({ language = "en" }) => {
