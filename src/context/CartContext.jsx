@@ -14,7 +14,14 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(() => {
     // Load cart from localStorage on init
     const savedCart = localStorage.getItem("pharma-cart");
-    return savedCart ? JSON.parse(savedCart) : [];
+    // Drop items saved from the old demo products (real catalog ids are UUIDs).
+    const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    try {
+      const list = savedCart ? JSON.parse(savedCart) : [];
+      return list.filter((i) => UUID.test(String(i._id || i.id)));
+    } catch {
+      return [];
+    }
   });
 
   // Save cart to localStorage whenever it changes
