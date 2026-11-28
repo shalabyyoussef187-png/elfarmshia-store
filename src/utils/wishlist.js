@@ -4,9 +4,14 @@ import { useSyncExternalStore } from "react";
 const KEY = "pharma-wishlist";
 const listeners = new Set();
 
+// Real catalog ids are UUIDs. Items saved from the old demo products (ids like "1", "2") are dropped.
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const read = () => {
   try {
-    return JSON.parse(localStorage.getItem(KEY) || "[]");
+    const list = JSON.parse(localStorage.getItem(KEY) || "[]");
+    const clean = list.filter((p) => UUID.test(String(p._id || p.id)));
+    if (clean.length !== list.length) localStorage.setItem(KEY, JSON.stringify(clean));
+    return clean;
   } catch {
     return [];
   }
